@@ -1,19 +1,20 @@
 use xcb::{self, x};
 
+use crate::err::NwwmError;
+
 pub struct WindowManager {
     conn: xcb::Connection,
 }
 
 impl WindowManager {
-    pub fn new() -> Self {
-        let (conn, _) = xcb::Connection::connect(None).expect(
-            "[nwwm] failed to connect to your display. check your DISPLAY environment variable.",
-        );
+    pub fn new() -> Result<Self, NwwmError> {
+        let (conn, _) =
+            xcb::Connection::connect(None).map_err(|_| NwwmError::DisplayUnavailable)?;
 
-        Self { conn: conn }
+        Ok(Self { conn: conn })
     }
 
-    pub fn run(&self) {
+    pub fn run(&self) -> Result<(), NwwmError> {
         let screen = self
             .conn
             .get_setup()
@@ -33,7 +34,7 @@ impl WindowManager {
 
         self.conn
             .check_request(cookie)
-            .expect("[nwwm] failed to initialise nwwm. is another wm running?");
+            .map_err(|_| NwwmError::InitError)?;
 
         loop {
             match self.conn.wait_for_event() {
@@ -45,9 +46,8 @@ impl WindowManager {
                     _ => {}
                 },
 
-                Err(err) => {
-                    eprintln!("[nwwm] X11 connection error {err}");
-                    break;
+                Err(_err) => {
+                    return Err(NwwmError::XCBConnError);
                 }
             }
         }
