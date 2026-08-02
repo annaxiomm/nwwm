@@ -1,0 +1,8 @@
+[package]
+name = "nwwm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+xcb = "1.7.0"
+xcb-util = "0.4.0"
