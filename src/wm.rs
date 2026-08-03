@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub struct WindowManager {
-    conn: xcb::Connection,
+    pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
     logger: logger::Logger,
     screennum: i32,
 }
@@ -56,8 +56,8 @@ impl WindowManager {
                         );
                     }
                     xcb::Event::X(x::Event::MapRequest(event)) => {
-                        self.logger.log("creating window", LogLevel::Debug);
-                        self.create_window(event);
+                        self.logger.log("creating window...", LogLevel::Debug);
+                        self.on_map_request(event);
                     }
 
                     _ => {
@@ -70,13 +70,5 @@ impl WindowManager {
                 }
             }
         }
-    }
-
-    fn create_window(&self, event: xcb::x::MapRequestEvent) {
-        self.conn.send_request(&xcb::x::MapWindow {
-            window: event.window(),
-        });
-
-        self.conn.flush().unwrap();
     }
 }

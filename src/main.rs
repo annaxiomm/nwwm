@@ -1,6 +1,7 @@
 use crate::err::NwwmError;
 
 mod err;
+mod handlers;
 mod logger;
 mod wm;
 
