@@ -1,6 +1,7 @@
 use crate::err::NwwmError;
 
 mod err;
+mod logger;
 mod wm;
 
 fn main() {
@@ -12,9 +13,11 @@ fn main() {
 }
 
 fn nwwm() -> Result<(), NwwmError> {
-    println!("[nwwm] hello!");
+    println!("[nwwm] starting nwwm...");
 
-    let wm = wm::WindowManager::new()?;
+    let logger = logger::Logger::new(true, true);
+
+    let wm = wm::WindowManager::new(logger)?;
     wm.run()?;
 
     Ok(())

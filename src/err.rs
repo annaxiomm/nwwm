@@ -4,6 +4,7 @@ use std::fmt;
 pub enum NwwmError {
     DisplayUnavailable,
     InitError,
+    ScreenGrabError,
     XCBConnError,
 }
 
@@ -13,17 +14,17 @@ impl fmt::Display for NwwmError {
             NwwmError::DisplayUnavailable => {
                 write!(
                     f,
-                    "[nwwm] failed to connect to X. check your DISPLAY environment variable (is X11 running?)"
+                    "[nwwm] error: failed to connect to X. check your DISPLAY environment variable (is X11 running?)"
                 )
             }
             NwwmError::InitError => {
-                write!(
-                    f,
-                    "[nwwm] failed to initialise nwwm. is another wm running?"
-                )
+                write!(f, "[nwwm] error: another window manager is already running")
+            }
+            NwwmError::ScreenGrabError => {
+                write!(f, "[nwwm] error: failed to get your screen")
             }
             NwwmError::XCBConnError => {
-                write!(f, "[nwwm] XCB connection error")
+                write!(f, "[nwwm] error: XCB connection error")
             }
         }
     }
