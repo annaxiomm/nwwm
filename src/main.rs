@@ -18,7 +18,7 @@ fn nwwm() -> Result<(), NwwmError> {
 
     let logger = logger::Logger::new(true, true);
 
-    let wm = wm::WindowManager::new(logger)?;
+    let mut wm = wm::WindowManager::new(logger)?;
     wm.run()?;
 
     Ok(())

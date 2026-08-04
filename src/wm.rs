@@ -5,8 +5,20 @@ use crate::{
     logger::{self, LogLevel},
 };
 
+#[derive(Debug)]
+pub struct Window {
+    pub id: xcb::x::Window,
+    pub workspace: usize,
+}
+
+pub struct Workspace {
+    pub windows: Vec<Window>,
+}
+
 pub struct WindowManager {
     pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
+    pub workspaces: Vec<Workspace>, // same here
+    pub current_workspace: usize,
     logger: logger::Logger,
     screennum: i32,
 }
@@ -16,14 +28,20 @@ impl WindowManager {
         let (conn, screennum) =
             xcb::Connection::connect(None).map_err(|_| NwwmError::DisplayUnavailable)?;
 
+        let workspaces: Vec<Workspace> = vec![Workspace {
+            windows: Vec::new(),
+        }];
+
         Ok(Self {
             conn,
+            workspaces,
             logger,
+            current_workspace: 0,
             screennum,
         })
     }
 
-    pub fn run(&self) -> Result<(), NwwmError> {
+    pub fn run(&mut self) -> Result<(), NwwmError> {
         let screen = self
             .conn
             .get_setup()
@@ -59,10 +77,11 @@ impl WindowManager {
                         self.logger.log("creating window...", LogLevel::Debug);
                         self.on_map_request(event);
                     }
-
-                    _ => {
-                        println!("{:?}", event)
+                    xcb::Event::X(x::Event::DestroyNotify(event)) => {
+                        self.on_destroy_notify(event);
                     }
+
+                    _ => {}
                 },
 
                 Err(_err) => {
