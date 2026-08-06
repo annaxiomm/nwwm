@@ -2,10 +2,13 @@
 // -----------
 // event handlers go here to avoid clogging up wm.rs
 
-use crate::wm::{Window, WindowManager};
+use crate::{
+    err::NwwmError,
+    wm::{Window, WindowManager},
+};
 
 impl WindowManager {
-    pub fn on_map_request(&mut self, ev: xcb::x::MapRequestEvent) {
+    pub fn on_map_request(&mut self, ev: xcb::x::MapRequestEvent) -> Result<(), NwwmError> {
         let window = ev.window();
 
         self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
@@ -32,15 +35,20 @@ impl WindowManager {
             ],
         });
 
-        println!("{:?}", self.workspaces[self.current_workspace].windows);
+        println!(
+            "tiling {:?}",
+            self.workspaces[self.current_workspace].windows
+        );
+
+        self.tile()?;
 
         self.conn.flush().unwrap(); // without this, nothing happens
+
+        Ok(())
     }
 
     pub fn on_destroy_notify(&mut self, ev: xcb::x::DestroyNotifyEvent) {
         let window = ev.window();
-
-        println!("deleting window {:?}", window);
 
         for workspace in &mut self.workspaces {
             workspace.windows.retain(|w| w.id != window);

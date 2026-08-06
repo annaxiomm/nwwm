@@ -3,6 +3,7 @@ use crate::err::NwwmError;
 mod err;
 mod handlers;
 mod logger;
+mod tile;
 mod wm;
 
 fn main() {
