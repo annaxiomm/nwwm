@@ -20,12 +20,6 @@ impl WindowManager {
 
         self.conn.send_request(&xcb::x::MapWindow { window });
 
-        self.conn.send_request(&xcb::x::SetInputFocus {
-            revert_to: xcb::x::InputFocus::PointerRoot,
-            focus: window,
-            time: xcb::x::CURRENT_TIME,
-        });
-
         self.conn.send_request(&xcb::x::GrabButton {
             owner_events: true,
             grab_window: window,
@@ -47,8 +41,8 @@ impl WindowManager {
             ],
         });
 
+        self.focus_window(window)?;
         self.tile()?;
-
         self.conn.flush().unwrap(); // without this, nothing happens
 
         Ok(())
@@ -67,8 +61,6 @@ impl WindowManager {
     }
 
     pub fn on_button_press(&mut self, ev: xcb::x::ButtonPressEvent) -> Result<(), NwwmError> {
-        println!("focusing window: {:?}", ev.event());
-
         self.focus_window(ev.event())?;
 
         Ok(())

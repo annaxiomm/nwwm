@@ -90,8 +90,6 @@ impl WindowManager {
     }
 
     pub fn tile(&mut self) -> Result<(), NwwmError> {
-        println!("tiling!");
-
         let screen = self
             .conn
             .get_setup()
@@ -104,8 +102,6 @@ impl WindowManager {
             .iter()
             .map(|w| w.id)
             .collect();
-
-        println!("windows to be tiled: {:?}", windows);
 
         let tile_layout: HashMap<x::Window, LayoutParams> =
             match self.workspaces[self.current_workspace].layout {
@@ -125,8 +121,6 @@ impl WindowManager {
     }
 
     pub fn focus_window(&mut self, window: xcb::x::Window) -> Result<(), NwwmError> {
-        println!("{:?}", window);
-
         self.conn.send_request(&xcb::x::SetInputFocus {
             revert_to: xcb::x::InputFocus::PointerRoot,
             focus: window,
