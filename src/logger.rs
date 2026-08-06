@@ -5,6 +5,7 @@ pub struct Logger {
     verbose: AtomicBool,
 }
 
+#[allow(dead_code)]
 pub enum LogLevel {
     Debug,
     Info,

@@ -1,4 +1,4 @@
-use crate::{err::NwwmError, wm::Window};
+use crate::err::NwwmError;
 use std::collections::HashMap;
 
 pub enum Layout {
@@ -21,6 +21,9 @@ pub fn basic(
     let mut layoutmap = HashMap::new();
 
     let window_count = windows.len();
+    if window_count == 0 {
+        return Ok(layoutmap);
+    }
     let window_width: u32 = (scwidth / window_count as u16) as u32;
 
     let mut start: i32 = 0;

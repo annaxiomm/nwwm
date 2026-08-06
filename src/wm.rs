@@ -4,11 +4,12 @@ use xcb::{self, x};
 
 use crate::{
     err::NwwmError,
-    logger::{self, LogLevel},
+    logger::{self},
     tile::{self, Layout, LayoutParams},
 };
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Window {
     pub id: xcb::x::Window,
     pub workspace: usize,
@@ -68,17 +69,20 @@ impl WindowManager {
                         );
                     }
                     xcb::Event::X(x::Event::MapRequest(event)) => {
-                        self.logger.log("creating window...", LogLevel::Debug);
                         self.on_map_request(event)?;
                     }
                     xcb::Event::X(x::Event::DestroyNotify(event)) => {
-                        self.on_destroy_notify(event);
+                        self.on_destroy_notify(event)?;
+                    }
+                    xcb::Event::X(x::Event::ButtonPress(event)) => {
+                        self.on_button_press(event)?;
                     }
 
                     _ => {}
                 },
 
-                Err(_err) => {
+                Err(err) => {
+                    println!("{err}");
                     return Err(NwwmError::XCBConnError);
                 }
             }
@@ -86,6 +90,8 @@ impl WindowManager {
     }
 
     pub fn tile(&mut self) -> Result<(), NwwmError> {
+        println!("tiling!");
+
         let screen = self
             .conn
             .get_setup()
@@ -99,6 +105,8 @@ impl WindowManager {
             .map(|w| w.id)
             .collect();
 
+        println!("windows to be tiled: {:?}", windows);
+
         let tile_layout: HashMap<x::Window, LayoutParams> =
             match self.workspaces[self.current_workspace].layout {
                 Layout::BasicTile => {
@@ -110,6 +118,22 @@ impl WindowManager {
             self.move_window(window, param.x, param.y)?;
             self.resize_window(window, param.width, param.height)?;
         }
+
+        self.conn.flush().unwrap();
+
+        Ok(())
+    }
+
+    pub fn focus_window(&mut self, window: xcb::x::Window) -> Result<(), NwwmError> {
+        println!("{:?}", window);
+
+        self.conn.send_request(&xcb::x::SetInputFocus {
+            revert_to: xcb::x::InputFocus::PointerRoot,
+            focus: window,
+            time: xcb::x::CURRENT_TIME,
+        });
+
+        self.conn.flush().unwrap();
 
         Ok(())
     }
