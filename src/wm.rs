@@ -3,16 +3,28 @@ use std::collections::HashMap;
 use xcb::{self, x};
 
 use crate::{
+    atoms::Atoms,
     err::NwwmError,
+    ewmh::Ewmh,
     logger::{self},
     tile::{self, Layout, LayoutParams},
 };
 
 #[derive(Debug)]
 #[allow(dead_code)]
+pub enum WindowType {
+    Floating,
+    Tiled,
+    Dock,
+    Ignore,
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
 pub struct Window {
     pub id: xcb::x::Window,
     pub workspace: usize,
+    pub window_type: WindowType,
 }
 
 pub struct Workspace {
@@ -23,6 +35,7 @@ pub struct Workspace {
 pub struct WindowManager {
     pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
     pub workspaces: Vec<Workspace>, // same here
+    pub ewmh: Ewmh,
     pub current_workspace: usize,
     logger: logger::Logger,
     screennum: i32,
@@ -33,6 +46,19 @@ impl WindowManager {
         let (conn, screennum) =
             xcb::Connection::connect(None).map_err(|_| NwwmError::DisplayUnavailable)?;
 
+        let screen = conn
+            .get_setup()
+            .roots()
+            .nth(screennum as usize)
+            .ok_or(NwwmError::ScreenGrabError)
+            .unwrap();
+
+        let root_window = screen.root();
+
+        let atoms = Atoms::new(&conn).map_err(|_| NwwmError::InitError)?;
+        let ewmh = Ewmh::new(atoms, &conn, root_window).map_err(|_| NwwmError::InitError)?;
+        ewmh.setup(&conn);
+
         let workspaces: Vec<Workspace> = vec![Workspace {
             windows: Vec::new(),
             layout: Layout::BasicTile,
@@ -41,6 +67,7 @@ impl WindowManager {
         Ok(Self {
             conn,
             workspaces,
+            ewmh,
             logger,
             current_workspace: 0,
             screennum,
@@ -48,16 +75,7 @@ impl WindowManager {
     }
 
     pub fn run(&mut self) -> Result<(), NwwmError> {
-        let screen = self
-            .conn
-            .get_setup()
-            .roots()
-            .nth(self.screennum as usize)
-            .ok_or(NwwmError::ScreenGrabError)
-            .unwrap();
-        let root_window = screen.root();
-
-        self.check_other_wm(root_window)?;
+        self.check_other_wm(self.ewmh.root)?;
 
         loop {
             match self.conn.wait_for_event() {
@@ -97,9 +115,11 @@ impl WindowManager {
             .nth(self.screennum as usize)
             .ok_or(NwwmError::ScreenGrabError)
             .unwrap();
+
         let windows: Vec<xcb::x::Window> = self.workspaces[self.current_workspace]
             .windows
             .iter()
+            .filter(|w| matches!(w.window_type, WindowType::Tiled))
             .map(|w| w.id)
             .collect();
 

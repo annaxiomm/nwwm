@@ -16,6 +16,7 @@ impl WindowManager {
             .push(Window {
                 id: window,
                 workspace: self.current_workspace,
+                window_type: crate::wm::WindowType::Tiled,
             });
 
         self.conn.send_request(&xcb::x::MapWindow { window });
