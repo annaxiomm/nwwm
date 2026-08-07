@@ -15,6 +15,10 @@ pub struct Atoms {
     pub net_supported: x::Atom,
     pub net_supporting_wm_check: x::Atom,
     pub net_wm_name: x::Atom,
+    pub net_wm_window_type: x::Atom,
+    pub net_wm_window_type_dialog: x::Atom,
+    pub net_wm_window_type_dock: x::Atom,
+
     pub utf8_string: x::Atom,
 }
 
@@ -24,6 +28,9 @@ impl Atoms {
             net_supported: intern_atom(conn, "_NET_SUPPORTED")?,
             net_supporting_wm_check: intern_atom(conn, "_NET_SUPPORTING_WM_CHECK")?,
             net_wm_name: intern_atom(conn, "_NET_WM_NAME")?,
+            net_wm_window_type: intern_atom(conn, "_NET_WM_WINDOW_TYPE")?,
+            net_wm_window_type_dialog: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DIALOG")?,
+            net_wm_window_type_dock: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DOCK")?,
             utf8_string: intern_atom(conn, "UTF8_STRING")?,
         })
     }

@@ -1,8 +1,8 @@
-use crate::err::NwwmError;
+use crate::{config::Config, err::NwwmError};
 use std::collections::HashMap;
 
 pub enum Layout {
-    BasicTile,
+    Columns,
 }
 
 #[derive(Debug)]
@@ -13,10 +13,11 @@ pub struct LayoutParams {
     pub height: u32,
 }
 
-pub fn basic(
+pub fn columns(
     scheight: u16,
     scwidth: u16,
     windows: Vec<xcb::x::Window>,
+    config: &Config,
 ) -> Result<HashMap<xcb::x::Window, LayoutParams>, NwwmError> {
     let mut layoutmap = HashMap::new();
 
@@ -24,23 +25,35 @@ pub fn basic(
     if window_count == 0 {
         return Ok(layoutmap);
     }
-    let window_width: u32 = (scwidth / window_count as u16) as u32;
+    let border_width = config.border_width;
 
-    let mut start: i32 = 0;
+    let available_width = scwidth as u32;
+    let slot_width = available_width / window_count as u32;
 
-    windows.into_iter().for_each(|w| {
+    let mut x = 0;
+
+    for (i, window) in windows.into_iter().enumerate() {
+        let width = if i == window_count - 1 {
+            available_width - x as u32
+        } else {
+            slot_width
+        };
+
+        // subtract borders here
+        let client_width = width - 2 * border_width;
+
         layoutmap.insert(
-            w,
+            window,
             LayoutParams {
-                x: start,
+                x,
                 y: 0,
-                width: window_width,
-                height: scheight as u32,
+                width: client_width,
+                height: scheight as u32 - 2 * border_width,
             },
         );
 
-        start += window_width as i32;
-    });
+        x += width as i32;
+    }
 
     Ok(layoutmap)
 }

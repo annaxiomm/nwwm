@@ -6,6 +6,7 @@ pub enum NwwmError {
     InitError,
     ScreenGrabError,
     XCBConnError,
+    MapError,
 }
 
 impl fmt::Display for NwwmError {
@@ -25,6 +26,9 @@ impl fmt::Display for NwwmError {
             }
             NwwmError::XCBConnError => {
                 write!(f, "[nwwm] error: XCB connection error")
+            }
+            NwwmError::MapError => {
+                write!(f, "[nwwm] error: error encountered while mapping window")
             }
         }
     }

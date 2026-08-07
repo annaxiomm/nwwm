@@ -4,6 +4,7 @@ use xcb::{self, x};
 
 use crate::{
     atoms::Atoms,
+    config::Config,
     err::NwwmError,
     ewmh::Ewmh,
     logger::{self},
@@ -13,18 +14,22 @@ use crate::{
 #[derive(Debug)]
 #[allow(dead_code)]
 pub enum WindowType {
-    Floating,
-    Tiled,
+    Dialog,
     Dock,
-    Ignore,
+    Normal,
 }
 
-#[derive(Debug)]
+pub enum WindowState {
+    Tiled,
+    Floating,
+}
+
 #[allow(dead_code)]
 pub struct Window {
     pub id: xcb::x::Window,
     pub workspace: usize,
     pub window_type: WindowType,
+    pub window_state: WindowState,
 }
 
 pub struct Workspace {
@@ -36,7 +41,9 @@ pub struct WindowManager {
     pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
     pub workspaces: Vec<Workspace>, // same here
     pub ewmh: Ewmh,
+    pub config: Config,
     pub current_workspace: usize,
+    pub focused: Option<xcb::x::Window>,
     logger: logger::Logger,
     screennum: i32,
 }
@@ -59,16 +66,20 @@ impl WindowManager {
         let ewmh = Ewmh::new(atoms, &conn, root_window).map_err(|_| NwwmError::InitError)?;
         ewmh.setup(&conn);
 
+        let config = Config::new(&conn, &screen);
+
         let workspaces: Vec<Workspace> = vec![Workspace {
             windows: Vec::new(),
-            layout: Layout::BasicTile,
+            layout: Layout::Columns,
         }];
 
         Ok(Self {
             conn,
             workspaces,
             ewmh,
+            config,
             logger,
+            focused: None,
             current_workspace: 0,
             screennum,
         })
@@ -77,14 +88,20 @@ impl WindowManager {
     pub fn run(&mut self) -> Result<(), NwwmError> {
         self.check_other_wm(self.ewmh.root)?;
 
+        self.conn.send_request(&xcb::x::GrabKey {
+            owner_events: false,
+            grab_window: self.ewmh.root,
+            modifiers: xcb::x::ModMask::ANY,
+            key: 25,
+            pointer_mode: xcb::x::GrabMode::Async,
+            keyboard_mode: xcb::x::GrabMode::Async,
+        });
+
         loop {
             match self.conn.wait_for_event() {
                 Ok(event) => match event {
                     xcb::Event::X(x::Event::KeyPress(key)) => {
-                        self.logger.log(
-                            format!("key pressed: {:?}", key.detail()).as_str(),
-                            logger::LogLevel::Info,
-                        );
+                        self.on_key_press(key)?;
                     }
                     xcb::Event::X(x::Event::MapRequest(event)) => {
                         self.on_map_request(event)?;
@@ -119,15 +136,18 @@ impl WindowManager {
         let windows: Vec<xcb::x::Window> = self.workspaces[self.current_workspace]
             .windows
             .iter()
-            .filter(|w| matches!(w.window_type, WindowType::Tiled))
+            .filter(|w| matches!(w.window_state, WindowState::Tiled))
             .map(|w| w.id)
             .collect();
 
         let tile_layout: HashMap<x::Window, LayoutParams> =
             match self.workspaces[self.current_workspace].layout {
-                Layout::BasicTile => {
-                    tile::basic(screen.height_in_pixels(), screen.width_in_pixels(), windows)?
-                }
+                Layout::Columns => tile::columns(
+                    screen.height_in_pixels(),
+                    screen.width_in_pixels(),
+                    windows,
+                    &self.config,
+                )?,
             };
 
         for (window, param) in &tile_layout {
@@ -142,12 +162,52 @@ impl WindowManager {
 
     pub fn focus_window(&mut self, window: xcb::x::Window) -> Result<(), NwwmError> {
         self.conn.send_request(&xcb::x::SetInputFocus {
-            revert_to: xcb::x::InputFocus::PointerRoot,
+            revert_to: x::InputFocus::PointerRoot,
             focus: window,
             time: xcb::x::CURRENT_TIME,
         });
 
+        self.conn.send_request(&xcb::x::ChangeWindowAttributes {
+            window,
+            value_list: &[xcb::x::Cw::BorderPixel(self.config.border_focused)],
+        });
+
+        if let Some(old) = self.focused {
+            self.conn.send_request(&xcb::x::ChangeWindowAttributes {
+                window: old,
+                value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
+            });
+        }
+
+        self.focused = Some(window);
+
         self.conn.flush().unwrap();
+
+        Ok(())
+    }
+
+    pub fn focus_next(&mut self) -> Result<(), NwwmError> {
+        let next = {
+            let workspace = &self.workspaces[self.current_workspace];
+            if workspace.windows.is_empty() {
+                return Ok(());
+            }
+
+            match self.focused {
+                Some(current) => {
+                    let current_index = workspace
+                        .windows
+                        .iter()
+                        .position(|w| w.id == current)
+                        .unwrap_or(0);
+                    workspace.windows[(current_index + 1) % workspace.windows.len()].id
+                }
+
+                None => workspace.windows[0].id,
+            }
+        };
+
+        self.focus_window(next)?;
 
         Ok(())
     }
@@ -188,5 +248,12 @@ impl WindowManager {
         });
 
         Ok(())
+    }
+
+    fn get_window(&self, id: x::Window) -> Option<&Window> {
+        self.workspaces
+            .iter()
+            .flat_map(|ws| ws.windows.iter())
+            .find(|w| w.id == id)
     }
 }

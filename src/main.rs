@@ -1,6 +1,7 @@
 use crate::err::NwwmError;
 
 mod atoms;
+mod config;
 mod err;
 mod ewmh;
 mod handlers;
