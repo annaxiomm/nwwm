@@ -9,6 +9,7 @@ an experimental window manager for X11
 - [x] can open at least 1 window
 - [x] columns tiling 
 - [x] click to focus
+- [x] (some) EWMH compliance 
 - [ ] that's it for now - more updates coming soon
 
 ## Installation / testing
