@@ -5,6 +5,7 @@ mod config;
 mod err;
 mod ewmh;
 mod handlers;
+mod keybinds;
 mod logger;
 mod tile;
 mod wm;

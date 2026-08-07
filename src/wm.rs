@@ -88,14 +88,7 @@ impl WindowManager {
     pub fn run(&mut self) -> Result<(), NwwmError> {
         self.check_other_wm(self.ewmh.root)?;
 
-        self.conn.send_request(&xcb::x::GrabKey {
-            owner_events: false,
-            grab_window: self.ewmh.root,
-            modifiers: xcb::x::ModMask::ANY,
-            key: 25,
-            pointer_mode: xcb::x::GrabMode::Async,
-            keyboard_mode: xcb::x::GrabMode::Async,
-        });
+        self.grab_keys();
 
         loop {
             match self.conn.wait_for_event() {

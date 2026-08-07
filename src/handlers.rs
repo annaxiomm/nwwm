@@ -95,8 +95,8 @@ impl WindowManager {
     }
 
     pub fn on_key_press(&mut self, ev: xcb::x::KeyPressEvent) -> Result<(), NwwmError> {
-        if ev.detail() == Keycode::from(25) {
-            self.focus_next()?;
+        if let Some(keybind) = self.config.keybinds.iter().find(|k| k.matches(&ev)) {
+            self.run_action(keybind.action)?;
         }
 
         Ok(())

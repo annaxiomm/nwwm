@@ -1,7 +1,10 @@
+use crate::keybinds::{Action, Keybind};
+
 pub struct Config {
     pub border_width: u32,
     pub border_focused: u32,
     pub border_unfocused: u32,
+    pub keybinds: Vec<Keybind>,
 }
 
 fn alloc_color(
@@ -26,10 +29,16 @@ impl Config {
         let border_width: u32 = 2;
         let border_focused = alloc_color(conn, screen, 0xffff, 0, 0);
         let border_unfocused = alloc_color(conn, screen, 0xffff, 0xffff, 0xffff);
+        let keybinds = vec![Keybind {
+            modifiers: xcb::x::ModMask::N4,
+            keycode: 25,
+            action: Action::FocusNext,
+        }];
         Self {
             border_width,
             border_focused,
             border_unfocused,
+            keybinds,
         }
     }
 }
