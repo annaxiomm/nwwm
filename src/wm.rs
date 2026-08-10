@@ -70,7 +70,7 @@ impl WindowManager {
 
         let workspaces: Vec<Workspace> = vec![Workspace {
             windows: Vec::new(),
-            layout: Layout::Columns,
+            layout: Layout::Monocle,
         }];
 
         Ok(Self {
@@ -141,6 +141,12 @@ impl WindowManager {
                     windows,
                     &self.config,
                 )?,
+                Layout::Monocle => tile::monocle(
+                    screen.height_in_pixels(),
+                    screen.width_in_pixels(),
+                    windows,
+                    &self.config,
+                )?,
             };
 
         for (window, param) in &tile_layout {
@@ -162,6 +168,11 @@ impl WindowManager {
             revert_to: x::InputFocus::PointerRoot,
             focus: window,
             time: xcb::x::CURRENT_TIME,
+        });
+
+        self.conn.send_request(&xcb::x::ConfigureWindow {
+            window,
+            value_list: &[xcb::x::ConfigWindow::StackMode(xcb::x::StackMode::Above)],
         });
 
         self.conn.send_request(&xcb::x::ChangeWindowAttributes {

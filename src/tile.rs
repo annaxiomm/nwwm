@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 pub enum Layout {
     Columns,
+    Monocle,
 }
 
 #[derive(Debug)]
@@ -11,6 +12,33 @@ pub struct LayoutParams {
     pub y: i32,
     pub width: u32,
     pub height: u32,
+}
+
+pub fn monocle(
+    scheight: u16,
+    scwidth: u16,
+    windows: Vec<xcb::x::Window>,
+    config: &Config,
+) -> Result<HashMap<xcb::x::Window, LayoutParams>, NwwmError> {
+    let mut layoutmap = HashMap::new();
+
+    let border_width = config.border_width;
+    let window_width = scwidth as u32 - (2 * border_width);
+    let window_height = scheight as u32 - (2 * border_width);
+
+    for window in windows.into_iter() {
+        layoutmap.insert(
+            window,
+            LayoutParams {
+                x: 0,
+                y: 0,
+                height: window_height,
+                width: window_width,
+            },
+        );
+    }
+
+    Ok(layoutmap)
 }
 
 pub fn columns(
