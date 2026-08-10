@@ -4,13 +4,19 @@ an experimental window manager for X11
 ![a screenshot of nwwm](./screenshot.png)
 
 ## Features
-- [x] runs
-- [x] attaches to X server
-- [x] can open at least 1 window
-- [x] columns tiling 
-- [x] click to focus
-- [x] (some) EWMH compliance 
-- [ ] that's it for now - more updates coming soon
+- [x] multiple tiling modes
+  - [x] columns
+  - [x] monocle
+  - [ ] master/stack
+  - [ ] dwindle
+- [x] keybinds
+  - [x] modular?
+  - [ ] customisable?
+- [x] cool cosmetic stuff
+  - [x] window borders
+  - [ ] vanity gaps
+- [x] ewmh compilance (extremely limited)
+- [ ] more stuff coming soon!
 
 ## Installation / testing
 **you will need:**
@@ -20,4 +26,6 @@ an experimental window manager for X11
 
 I severely recommend that you DO NOT install nwwm as it is. it's 100% unusable and you will be stuck with a black screen (or whatever your wallpaper is).
 
-to test it, make sure you aren't using display 2 for anything then run `./test.sh &`. after that, open your app of choice with `DISPLAY=:2 <app-name>`
+to test it, make sure you aren't using display 2 for anything then run `./test.sh &`. this will launch a Xephyr instance with nwwm running, and it will also launch kitty within nwwm (which you can then use to open other apps).
+
+If you want to make changes to the test script feel free, but **for the love of god do not commit them**
