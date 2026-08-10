@@ -154,6 +154,10 @@ impl WindowManager {
     }
 
     pub fn focus_window(&mut self, window: xcb::x::Window) -> Result<(), NwwmError> {
+        if self.focused == Some(window) {
+            return Ok(());
+        }
+
         self.conn.send_request(&xcb::x::SetInputFocus {
             revert_to: x::InputFocus::PointerRoot,
             focus: window,
