@@ -62,6 +62,18 @@ impl WindowManager {
 
         let root_window = screen.root();
 
+        conn.send_request(&xcb::x::GrabButton {
+            owner_events: false,
+            grab_window: root_window,
+            event_mask: xcb::x::EventMask::BUTTON_PRESS,
+            pointer_mode: xcb::x::GrabMode::Sync,
+            keyboard_mode: xcb::x::GrabMode::Sync,
+            confine_to: xcb::x::WINDOW_NONE,
+            cursor: xcb::x::CURSOR_NONE,
+            button: xcb::x::ButtonIndex::N1,
+            modifiers: xcb::x::ModMask::ANY,
+        });
+
         let atoms = Atoms::new(&conn).map_err(|_| NwwmError::InitError)?;
         let ewmh = Ewmh::new(atoms, &conn, root_window).map_err(|_| NwwmError::InitError)?;
         ewmh.setup(&conn);
@@ -70,7 +82,7 @@ impl WindowManager {
 
         let workspaces: Vec<Workspace> = vec![Workspace {
             windows: Vec::new(),
-            layout: Layout::Monocle,
+            layout: Layout::MasterStack,
         }];
 
         Ok(Self {
@@ -142,6 +154,12 @@ impl WindowManager {
                     &self.config,
                 )?,
                 Layout::Monocle => tile::monocle(
+                    screen.height_in_pixels(),
+                    screen.width_in_pixels(),
+                    windows,
+                    &self.config,
+                )?,
+                Layout::MasterStack => tile::master_stack(
                     screen.height_in_pixels(),
                     screen.width_in_pixels(),
                     windows,

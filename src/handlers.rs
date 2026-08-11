@@ -43,18 +43,6 @@ impl WindowManager {
 
         self.conn.send_request(&xcb::x::MapWindow { window });
 
-        self.conn.send_request(&xcb::x::GrabButton {
-            owner_events: true,
-            grab_window: window,
-            event_mask: xcb::x::EventMask::BUTTON_PRESS,
-            pointer_mode: xcb::x::GrabMode::Async,
-            keyboard_mode: xcb::x::GrabMode::Async,
-            confine_to: xcb::x::WINDOW_NONE,
-            cursor: xcb::x::CURSOR_NONE,
-            button: xcb::x::ButtonIndex::N1,
-            modifiers: xcb::x::ModMask::ANY,
-        });
-
         self.conn.send_request(&xcb::x::ConfigureWindow {
             window,
             value_list: &[xcb::x::ConfigWindow::BorderWidth(2)],
@@ -89,7 +77,12 @@ impl WindowManager {
     }
 
     pub fn on_button_press(&mut self, ev: xcb::x::ButtonPressEvent) -> Result<(), NwwmError> {
-        self.focus_window(ev.event())?;
+        self.focus_window(ev.child())?;
+        self.conn.send_request(&xcb::x::AllowEvents {
+            mode: xcb::x::Allow::ReplayPointer,
+            time: ev.time(),
+        });
+        self.conn.flush().unwrap();
 
         Ok(())
     }
