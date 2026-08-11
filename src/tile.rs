@@ -4,6 +4,7 @@ use std::collections::HashMap;
 pub enum Layout {
     Columns,
     Monocle,
+    MasterStack,
 }
 
 #[derive(Debug)]
@@ -83,5 +84,81 @@ pub fn columns(
         x += width as i32;
     }
 
+    Ok(layoutmap)
+}
+
+pub fn master_stack(
+    scheight: u16,
+    scwidth: u16,
+    windows: Vec<xcb::x::Window>,
+    config: &Config,
+) -> Result<HashMap<xcb::x::Window, LayoutParams>, NwwmError> {
+    let mut layoutmap = HashMap::new();
+    let window_count = windows.len();
+
+    // if layout is empty
+    if window_count == 0 {
+        println!("you sussin");
+        return Ok(layoutmap);
+    }
+
+    let screen_width = scwidth as u32;
+    let screen_height = scheight as u32;
+
+    // if theres just a master - no stack
+    if window_count == 1 {
+        println!("you bussin");
+        layoutmap.insert(
+            windows[0],
+            LayoutParams {
+                x: 0,
+                y: 0,
+                width: screen_width - (2 * config.border_width),
+                height: screen_height - (2 * config.border_width),
+            },
+        );
+        return Ok(layoutmap);
+    }
+
+    // if there is a stack
+    let master_width = screen_width / 2;
+    let stack_width = screen_width - master_width;
+    let stack_count = window_count as u32 - 1;
+
+    layoutmap.insert(
+        windows[0],
+        LayoutParams {
+            x: 0,
+            y: 0,
+            width: master_width - (2 * config.border_width),
+            height: screen_height - (2 * config.border_width),
+        },
+    );
+
+    let slot_height = screen_height / stack_count;
+    let mut y = 0;
+
+    for (i, window) in windows.into_iter().skip(1).enumerate() {
+        let height = if i == stack_count as usize - 1 {
+            screen_height - y as u32
+        } else {
+            slot_height
+        };
+
+        // subtract borders here
+        let client_height = height - 2 * config.border_width;
+
+        layoutmap.insert(
+            window,
+            LayoutParams {
+                x: master_width as i32,
+                y: y,
+                width: stack_width - 2 * config.border_width,
+                height: client_height,
+            },
+        );
+
+        y += height as i32;
+    }
     Ok(layoutmap)
 }
