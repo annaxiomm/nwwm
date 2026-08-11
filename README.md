@@ -1,5 +1,10 @@
-# nwwm
-an experimental window manager for X11
+<div align="center">
+<h1>nwwm</h1>
+<p>an experimental window manager for x11</p>
+<img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/annaxiomm/nwwm/rust.yml">
+<img alt="GitHub License" src="https://img.shields.io/github/license/annaxiomm/nwwm">
+<br/><br/>
+</div>
 
 ![a screenshot of nwwm](./screenshot.png)
 
