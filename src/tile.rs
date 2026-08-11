@@ -98,7 +98,6 @@ pub fn master_stack(
 
     // if layout is empty
     if window_count == 0 {
-        println!("you sussin");
         return Ok(layoutmap);
     }
 
@@ -107,7 +106,6 @@ pub fn master_stack(
 
     // if theres just a master - no stack
     if window_count == 1 {
-        println!("you bussin");
         layoutmap.insert(
             windows[0],
             LayoutParams {
