@@ -1,4 +1,7 @@
-use crate::keybinds::{Action, Keybind};
+use crate::{
+    keybinds::{Action, Keybind},
+    tile::Layout,
+};
 use xkbcommon::xkb;
 
 pub struct Config {
@@ -30,11 +33,28 @@ impl Config {
         let border_width: u32 = 2;
         let border_focused = alloc_color(conn, screen, 0xffff, 0, 0);
         let border_unfocused = alloc_color(conn, screen, 0xffff, 0xffff, 0xffff);
-        let keybinds = vec![Keybind {
-            modifiers: xcb::x::ModMask::N4,
-            keysym: xkb::keysyms::KEY_w,
-            action: Action::FocusNext,
-        }];
+        let keybinds = vec![
+            Keybind {
+                modifiers: xcb::x::ModMask::N4,
+                keysym: xkb::keysyms::KEY_w,
+                action: Action::FocusNext,
+            },
+            Keybind {
+                modifiers: xcb::x::ModMask::N4,
+                keysym: xkb::keysyms::KEY_m,
+                action: Action::SetLayout(Layout::Monocle),
+            },
+            Keybind {
+                modifiers: xcb::x::ModMask::N4,
+                keysym: xkb::keysyms::KEY_s,
+                action: Action::SetLayout(Layout::MasterStack),
+            },
+            Keybind {
+                modifiers: xcb::x::ModMask::N4,
+                keysym: xkb::keysyms::KEY_Return,
+                action: Action::Exec("kitty".to_string()),
+            },
+        ];
         Self {
             border_width,
             border_focused,

@@ -96,6 +96,9 @@ impl WindowManager {
     }
 
     pub fn on_button_press(&mut self, ev: xcb::x::ButtonPressEvent) -> Result<(), NwwmError> {
+        if ev.child() == xcb::x::WINDOW_NONE {
+            return Ok(());
+        }
         self.focus_window(ev.child())?;
         self.conn.send_request(&xcb::x::AllowEvents {
             mode: xcb::x::Allow::ReplayPointer,
@@ -107,13 +110,14 @@ impl WindowManager {
     }
 
     pub fn on_key_press(&mut self, ev: xcb::x::KeyPressEvent) -> Result<(), NwwmError> {
+        println!("something is happening");
         if let Some(keybind) = self
             .config
             .keybinds
             .iter()
             .find(|k| k.matches(&self.xkb_state, &ev))
         {
-            self.run_action(keybind.action)?;
+            self.run_action(keybind.action.clone())?;
         }
 
         Ok(())

@@ -71,7 +71,7 @@ impl WindowManager {
             grab_window: root_window,
             event_mask: xcb::x::EventMask::BUTTON_PRESS,
             pointer_mode: xcb::x::GrabMode::Sync,
-            keyboard_mode: xcb::x::GrabMode::Sync,
+            keyboard_mode: xcb::x::GrabMode::Async,
             confine_to: xcb::x::WINDOW_NONE,
             cursor: xcb::x::CURSOR_NONE,
             button: xcb::x::ButtonIndex::N1,
@@ -119,7 +119,14 @@ impl WindowManager {
     pub fn run(&mut self) -> Result<(), NwwmError> {
         self.check_other_wm(self.ewmh.root)?;
 
+        println!("grabbing keys...");
         self.grab_keys();
+        self.conn.send_request(&xcb::x::SetInputFocus {
+            revert_to: xcb::x::InputFocus::PointerRoot,
+            focus: self.ewmh.root,
+            time: xcb::x::CURRENT_TIME,
+        });
+        self.conn.flush().unwrap();
 
         loop {
             match self.conn.wait_for_event() {
@@ -258,7 +265,9 @@ impl WindowManager {
     }
 
     pub fn set_layout(&mut self, layout: Layout) -> Result<(), NwwmError> {
+        println!("hello world! {:?}", layout);
         self.workspaces[self.current_workspace].layout = layout;
+        self.tile()?;
 
         Ok(())
     }

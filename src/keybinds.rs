@@ -1,11 +1,13 @@
 use xkbcommon::xkb;
 
 use crate::{err::NwwmError, tile::Layout, wm::WindowManager};
+use std::process::{Command, Stdio};
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub enum Action {
     FocusNext,
     SetLayout(Layout),
+    Exec(String),
 }
 
 pub struct Keybind {
@@ -52,7 +54,7 @@ impl WindowManager {
             });
 
             if let Some(keycode) = keycode {
-                self.conn.send_request(&xcb::x::GrabKey {
+                let cookie = self.conn.send_request_checked(&xcb::x::GrabKey {
                     owner_events: false,
                     grab_window: self.ewmh.root,
                     modifiers: keybind.modifiers,
@@ -60,15 +62,47 @@ impl WindowManager {
                     pointer_mode: xcb::x::GrabMode::Async,
                     keyboard_mode: xcb::x::GrabMode::Async,
                 });
+
+                match self.conn.check_request(cookie) {
+                    Ok(_) => println!("success!"),
+                    Err(e) => println!("error: {:?}", e),
+                }
             }
         }
+
+        self.conn.flush().unwrap();
     }
 
     pub fn run_action(&mut self, action: Action) -> Result<(), NwwmError> {
         match action {
             Action::FocusNext => self.focus_next()?,
             Action::SetLayout(layout) => self.set_layout(layout)?,
+            Action::Exec(command) => {
+                let command_cloned = command.clone();
+                if let Err(_) = self.exec_command(command) {
+                    eprintln!(
+                        "[nwwm] warn: failed to spawn command {}",
+                        command_cloned.split(" ").next().unwrap()
+                    )
+                }
+            }
         };
+        Ok(())
+    }
+
+    pub fn exec_command(&self, command: String) -> Result<(), NwwmError> {
+        let mut parts = command.split_whitespace();
+        let Some(program) = parts.next() else {
+            return Ok(());
+        };
+
+        Command::new(program)
+            .args(parts)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .map_err(|_| NwwmError::SpawnCommandError)?;
         Ok(())
     }
 }

@@ -8,6 +8,7 @@ pub enum NwwmError {
     XCBConnError,
     MapError,
     XKBError,
+    SpawnCommandError,
 }
 
 impl fmt::Display for NwwmError {
@@ -33,6 +34,12 @@ impl fmt::Display for NwwmError {
             }
             NwwmError::XKBError => {
                 write!(f, "[nwwm] error: error encountered while initialising XKB")
+            }
+            NwwmError::SpawnCommandError => {
+                write!(
+                    f,
+                    "[nwwm] error: could not spawn command (this shouldn't be fatal - open an issue on GitHub)"
+                )
             }
         }
     }
