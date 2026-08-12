@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use xcb::{self, x};
+use xkbcommon::xkb;
 
 use crate::{
     atoms::Atoms,
@@ -16,6 +17,7 @@ use crate::{
 pub enum WindowType {
     Dialog,
     Dock,
+    Utility,
     Normal,
 }
 
@@ -44,6 +46,8 @@ pub struct WindowManager {
     pub config: Config,
     pub current_workspace: usize,
     pub focused: Option<xcb::x::Window>,
+    pub xkb_state: xkb::State,
+    pub xkb_keymap: xkb::Keymap,
     logger: logger::Logger,
     screennum: i32,
 }
@@ -85,6 +89,19 @@ impl WindowManager {
             layout: Layout::MasterStack,
         }];
 
+        let context = xkb::Context::new(xkb::COMPILE_NO_FLAGS);
+        let xkb_keymap = xkb::Keymap::new_from_names(
+            &context,
+            "",
+            "",
+            "",
+            "",
+            None,
+            xkb::KEYMAP_COMPILE_NO_FLAGS,
+        )
+        .ok_or_else(|| NwwmError::XKBError)?;
+        let xkb_state = xkb::State::new(&xkb_keymap);
+
         Ok(Self {
             conn,
             workspaces,
@@ -92,6 +109,8 @@ impl WindowManager {
             config,
             logger,
             focused: None,
+            xkb_state,
+            xkb_keymap,
             current_workspace: 0,
             screennum,
         })
@@ -234,6 +253,12 @@ impl WindowManager {
         };
 
         self.focus_window(next)?;
+
+        Ok(())
+    }
+
+    pub fn set_layout(&mut self, layout: Layout) -> Result<(), NwwmError> {
+        self.workspaces[self.current_workspace].layout = layout;
 
         Ok(())
     }

@@ -7,6 +7,7 @@ pub enum NwwmError {
     ScreenGrabError,
     XCBConnError,
     MapError,
+    XKBError,
 }
 
 impl fmt::Display for NwwmError {
@@ -29,6 +30,9 @@ impl fmt::Display for NwwmError {
             }
             NwwmError::MapError => {
                 write!(f, "[nwwm] error: error encountered while mapping window")
+            }
+            NwwmError::XKBError => {
+                write!(f, "[nwwm] error: error encountered while initialising XKB")
             }
         }
     }

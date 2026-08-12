@@ -1,4 +1,5 @@
 use crate::keybinds::{Action, Keybind};
+use xkbcommon::xkb;
 
 pub struct Config {
     pub border_width: u32,
@@ -31,7 +32,7 @@ impl Config {
         let border_unfocused = alloc_color(conn, screen, 0xffff, 0xffff, 0xffff);
         let keybinds = vec![Keybind {
             modifiers: xcb::x::ModMask::N4,
-            keycode: 25,
+            keysym: xkb::keysyms::KEY_w,
             action: Action::FocusNext,
         }];
         Self {

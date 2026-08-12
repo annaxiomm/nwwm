@@ -2,7 +2,7 @@
 // -----------
 // event handlers go here to avoid clogging up wm.rs
 
-use xcb::x::Keycode;
+use xkbcommon::xkb;
 
 use crate::{
     err::NwwmError,
@@ -29,8 +29,8 @@ impl WindowManager {
         let window_type = self.get_type(types);
         let window_state = self.get_state(&window_type);
 
-        if !matches!(window_type, WindowType::Dock) {
-            // don't manage dock windows
+        if matches!(window_type, WindowType::Normal) {
+            // don't manage dock or dialog windows
             self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
                 .windows // we still know about it
                 .push(Window {
@@ -62,13 +62,32 @@ impl WindowManager {
 
     pub fn on_destroy_notify(&mut self, ev: xcb::x::DestroyNotifyEvent) -> Result<(), NwwmError> {
         let window = ev.window();
+        let windows = &self.workspaces[self.current_workspace].windows;
+        let new_focus = if self.focused == Some(window) {
+            windows
+                .iter()
+                .position(|w| w.id == window)
+                .and_then(|position| {
+                    position
+                        .checked_sub(1)
+                        .and_then(|prev| windows.get(prev))
+                        .or_else(|| windows.get(position + 1))
+                })
+                .map(|w| w.id)
+        } else {
+            None
+        };
 
-        if self.focused == Some(window) {
+        if Some(window) == self.focused {
             self.focused = None;
         }
 
         for workspace in &mut self.workspaces {
             workspace.windows.retain(|w| w.id != window);
+        }
+
+        if let Some(new_window) = new_focus {
+            self.focus_window(new_window)?;
         }
 
         self.tile()?;
@@ -88,7 +107,12 @@ impl WindowManager {
     }
 
     pub fn on_key_press(&mut self, ev: xcb::x::KeyPressEvent) -> Result<(), NwwmError> {
-        if let Some(keybind) = self.config.keybinds.iter().find(|k| k.matches(&ev)) {
+        if let Some(keybind) = self
+            .config
+            .keybinds
+            .iter()
+            .find(|k| k.matches(&self.xkb_state, &ev))
+        {
             self.run_action(keybind.action)?;
         }
 
@@ -104,14 +128,19 @@ impl WindowManager {
             return WindowType::Dock;
         }
 
+        if types.contains(&self.ewmh.atoms.net_wm_window_type_utility) {
+            return WindowType::Utility;
+        }
+
+        println!("{:?}", types);
+
         WindowType::Normal
     }
 
     fn get_state(&self, window_type: &WindowType) -> WindowState {
         match window_type {
+            WindowType::Dock | WindowType::Dialog | WindowType::Utility => WindowState::Floating,
             WindowType::Normal => WindowState::Tiled,
-            WindowType::Dialog => WindowState::Floating,
-            WindowType::Dock => WindowState::Floating,
         }
     }
 }
