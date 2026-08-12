@@ -20,7 +20,7 @@ jobs:
       run: |
           sudo apt-get update
           sudo apt-get install -y libxcb1-dev
-          sudo apt-get install -y libxkbcommon
+          sudo apt-get install -y libxkbcommon-dev
     - name: Build
       run: cargo build --verbose
     # skip tests - i don't have any unit tests
