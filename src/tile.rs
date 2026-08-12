@@ -1,6 +1,7 @@
 use crate::{config::Config, err::NwwmError};
 use std::collections::HashMap;
 
+#[derive(Clone, Copy)]
 pub enum Layout {
     Columns,
     Monocle,
