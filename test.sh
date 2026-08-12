@@ -1,4 +1,4 @@
 #!/usr/bin/bash
-Xephyr :2 &
+Xephyr :2 -screen 1280x720 &
 DISPLAY=:2 cargo run &
 DISPLAY=:2 kitty &
