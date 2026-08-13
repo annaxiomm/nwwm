@@ -12,7 +12,7 @@
 - [x] multiple tiling modes
   - [x] columns
   - [x] monocle
-  - [ ] master/stack
+  - [x] master/stack
   - [ ] dwindle
 - [x] keybinds
   - [x] modular?
