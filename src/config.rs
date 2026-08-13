@@ -51,6 +51,11 @@ impl Config {
             },
             Keybind {
                 modifiers: xcb::x::ModMask::N4,
+                keysym: xkb::keysyms::KEY_r,
+                action: Action::Exec("rofi -show run".to_string()),
+            },
+            Keybind {
+                modifiers: xcb::x::ModMask::N4,
                 keysym: xkb::keysyms::KEY_Return,
                 action: Action::Exec("kitty".to_string()),
             },
