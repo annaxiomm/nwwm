@@ -95,15 +95,58 @@ impl WindowManager {
         Ok(())
     }
 
-    pub fn on_button_press(&mut self, ev: xcb::x::ButtonPressEvent) -> Result<(), NwwmError> {
-        if ev.child() == xcb::x::WINDOW_NONE {
-            return Ok(());
+    pub fn on_config_request(
+        &mut self,
+        ev: xcb::x::ConfigureRequestEvent,
+    ) -> Result<(), NwwmError> {
+        let window = ev.window();
+        let cookie = self.conn.send_request(&xcb::x::GetProperty {
+            delete: false,
+            window: window,
+            property: self.ewmh.atoms.net_wm_window_type,
+            r#type: xcb::x::ATOM_ATOM,
+            long_offset: 0,
+            long_length: 32,
+        });
+        let reply = self
+            .conn
+            .wait_for_reply(cookie)
+            .map_err(|_| NwwmError::MapError)?;
+        let types: &[xcb::x::Atom] = reply.value();
+        let window_type = self.get_type(types);
+        let window_state = self.get_state(&window_type);
+
+        if matches!(window_state, WindowState::Floating) {
+            let mut values = Vec::new();
+            if ev.value_mask().contains(xcb::x::ConfigWindowMask::X) {
+                values.push(xcb::x::ConfigWindow::X(ev.x() as i32));
+            }
+            if ev.value_mask().contains(xcb::x::ConfigWindowMask::Y) {
+                values.push(xcb::x::ConfigWindow::Y(ev.y() as i32));
+            }
+            if ev.value_mask().contains(xcb::x::ConfigWindowMask::WIDTH) {
+                values.push(xcb::x::ConfigWindow::Width(ev.width() as u32));
+            }
+            if ev.value_mask().contains(xcb::x::ConfigWindowMask::HEIGHT) {
+                values.push(xcb::x::ConfigWindow::Height(ev.height() as u32));
+            }
+            self.conn.send_request(&xcb::x::ConfigureWindow {
+                window,
+                value_list: &values,
+            });
         }
-        self.focus_window(ev.child())?;
+
+        Ok(())
+    }
+
+    pub fn on_button_press(&mut self, ev: xcb::x::ButtonPressEvent) -> Result<(), NwwmError> {
         self.conn.send_request(&xcb::x::AllowEvents {
             mode: xcb::x::Allow::ReplayPointer,
             time: ev.time(),
         });
+        if ev.child() != xcb::x::WINDOW_NONE {
+            self.focus_window(ev.child())?;
+        }
         self.conn.flush().unwrap();
 
         Ok(())

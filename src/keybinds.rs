@@ -23,15 +23,6 @@ impl Keybind {
         let keycode = xkb::Keycode::new(ev.detail() as u32);
         let keysym = xkb_state.key_get_one_sym(keycode);
 
-        println!(
-            "keycode={}, keysym={}, expected={}, state={:?}, expected_state={:?}",
-            ev.detail(),
-            keysym.raw(),
-            self.keysym,
-            state,
-            self.modifiers,
-        );
-
         self.keysym == keysym.raw() && self.modifiers == state
     }
 }

@@ -137,6 +137,9 @@ impl WindowManager {
                     xcb::Event::X(x::Event::MapRequest(event)) => {
                         self.on_map_request(event)?;
                     }
+                    xcb::Event::X(x::Event::ConfigureRequest(event)) => {
+                        self.on_config_request(event)?;
+                    }
                     xcb::Event::X(x::Event::DestroyNotify(event)) => {
                         self.on_destroy_notify(event)?;
                     }
