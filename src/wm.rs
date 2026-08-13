@@ -267,8 +267,14 @@ impl WindowManager {
         Ok(())
     }
 
+    pub fn close_window(&self, window: xcb::x::Window) -> Result<(), NwwmError> {
+        self.conn.send_request(&xcb::x::DestroyWindow { window });
+        self.conn.flush().unwrap();
+
+        Ok(())
+    }
+
     pub fn set_layout(&mut self, layout: Layout) -> Result<(), NwwmError> {
-        println!("hello world! {:?}", layout);
         self.workspaces[self.current_workspace].layout = layout;
         self.tile()?;
 

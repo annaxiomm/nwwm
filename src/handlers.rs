@@ -28,9 +28,10 @@ impl WindowManager {
         let types: &[xcb::x::Atom] = reply.value();
         let window_type = self.get_type(types);
         let window_state = self.get_state(&window_type);
+        let is_dock = matches!(&window_type, WindowType::Dock);
 
-        if matches!(window_type, WindowType::Normal) {
-            // don't manage dock or dialog windows
+        if !is_dock {
+            // don't manage dock windows
             self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
                 .windows // we still know about it
                 .push(Window {
@@ -39,21 +40,25 @@ impl WindowManager {
                     window_type,
                     window_state,
                 });
+
+            // dock windows shouldn't get borders
+            self.conn.send_request(&xcb::x::ConfigureWindow {
+                window,
+                value_list: &[xcb::x::ConfigWindow::BorderWidth(2)],
+            });
+
+            self.conn.send_request(&xcb::x::ChangeWindowAttributes {
+                window,
+                value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
+            });
         }
 
         self.conn.send_request(&xcb::x::MapWindow { window });
 
-        self.conn.send_request(&xcb::x::ConfigureWindow {
-            window,
-            value_list: &[xcb::x::ConfigWindow::BorderWidth(2)],
-        });
+        if !is_dock {
+            self.focus_window(window)?;
+        }
 
-        self.conn.send_request(&xcb::x::ChangeWindowAttributes {
-            window,
-            value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
-        });
-
-        self.focus_window(window)?;
         self.tile()?;
         self.conn.flush().unwrap(); // without this, nothing happens
 
@@ -145,8 +150,18 @@ impl WindowManager {
             time: ev.time(),
         });
         if ev.child() != xcb::x::WINDOW_NONE {
-            self.focus_window(ev.child())?;
+            match self.workspaces[self.current_workspace]
+                .windows
+                .iter()
+                .find(|w| w.id == ev.child())
+                .unwrap()
+                .window_type
+            {
+                WindowType::Dock => {}
+                _ => self.focus_window(ev.child())?,
+            }
         }
+
         self.conn.flush().unwrap();
 
         Ok(())

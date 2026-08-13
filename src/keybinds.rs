@@ -6,6 +6,7 @@ use std::process::{Command, Stdio};
 #[derive(Clone)]
 pub enum Action {
     FocusNext,
+    CloseWindow,
     SetLayout(Layout),
     Exec(String),
 }
@@ -68,6 +69,11 @@ impl WindowManager {
         match action {
             Action::FocusNext => self.focus_next()?,
             Action::SetLayout(layout) => self.set_layout(layout)?,
+            Action::CloseWindow => {
+                if let Some(win) = self.focused {
+                    self.close_window(win)?;
+                }
+            }
             Action::Exec(command) => {
                 let command_cloned = command.clone();
                 if let Err(_) = self.exec_command(command) {
