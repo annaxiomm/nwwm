@@ -2,7 +2,9 @@
 <h1>nwwm</h1>
 <p>an experimental window manager for x11</p>
 <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/annaxiomm/nwwm/rust.yml">
-<img alt="GitHub License" src="https://img.shields.io/github/license/annaxiomm/nwwm">
+<img alt="GitHub License" src="https://img.shields.io/github/license/annaxiomm/nwwm" />
+<br/>
+<a href="https://github.com/annaxiomm/nwwm">GitHub</a> ⋅ <a href="https://codeberg.org/annaxiomm/nwwm">Codeberg (mirror)</a>
 <br/><br/>
 </div>
 
