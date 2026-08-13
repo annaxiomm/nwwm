@@ -4,8 +4,10 @@
 <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/annaxiomm/nwwm/rust.yml">
 <img alt="GitHub License" src="https://img.shields.io/github/license/annaxiomm/nwwm" />
 <br/>
+<div style="font-size: 10px;">
 <a href="https://github.com/annaxiomm/nwwm">GitHub</a> ⋅ <a href="https://codeberg.org/annaxiomm/nwwm">Codeberg (mirror)</a>
 <br/><br/>
+</div>
 </div>
 
 ![a screenshot of nwwm](./screenshot.png)
