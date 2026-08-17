@@ -36,3 +36,19 @@ I severely recommend that you DO NOT install nwwm as it is. it's 100% unusable a
 to test it, make sure you aren't using display 2 for anything then run `./test.sh &`. this will launch a Xephyr instance with nwwm running, and it will also launch kitty within nwwm (which you can then use to open other apps).
 
 If you want to make changes to the test script feel free, but **for the love of god do not commit them**
+
+## EWMH Checklist
+### WM
+- [x] _NET_WM_NAME
+- [x] _NET_SUPPORTING_WM_CHECK
+- [x] _NET_SUPPORTED
+- [x] _NET_CLIENT_LIST
+### Desktops
+- [ ] _NET_NUMBER_OF_DESKTOPS
+- [ ] _NET_DESKTOP_GEOMETRY
+- [ ] _NET_DESKTOP_VIEWPORT
+- [ ] _NET_CURRENT_DESKTOP
+- [ ] _NET_DESKTOP_NAMES
+### etc
+- [ ] _NET_ACTIVE_WINDOW
+- [ ] _NET_WORKAREA
