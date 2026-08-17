@@ -8,7 +8,7 @@ use crate::{
     config::Config,
     err::NwwmError,
     ewmh::Ewmh,
-    logger::{self},
+    logger::{self, LogLevel},
     tile::{self, Layout, LayoutParams},
 };
 
@@ -51,7 +51,7 @@ pub struct WindowManager {
     pub focused: Option<xcb::x::Window>,
     pub xkb_state: xkb::State,
     pub xkb_keymap: xkb::Keymap,
-    logger: logger::Logger,
+    pub logger: logger::Logger,
     screennum: i32,
 }
 
@@ -81,10 +81,12 @@ impl WindowManager {
             modifiers: xcb::x::ModMask::ANY,
         });
 
+        logger.log("initialising EWMH system...", LogLevel::Debug);
         let atoms = Atoms::new(&conn).map_err(|_| NwwmError::InitError)?;
         let ewmh = Ewmh::new(atoms, &conn, root_window).map_err(|_| NwwmError::InitError)?;
         ewmh.setup(&conn);
 
+        logger.log("initialisting config...", LogLevel::Debug);
         let config = Config::new(&conn, &screen);
 
         let workspaces: Vec<Workspace> = vec![Workspace {
@@ -93,6 +95,7 @@ impl WindowManager {
         }];
         let clients: Vec<Window> = Vec::new();
 
+        logger.log("initialising xkb...", LogLevel::Debug);
         let context = xkb::Context::new(xkb::COMPILE_NO_FLAGS);
         let xkb_keymap = xkb::Keymap::new_from_names(
             &context,
@@ -122,9 +125,12 @@ impl WindowManager {
     }
 
     pub fn run(&mut self) -> Result<(), NwwmError> {
+        self.logger.log(
+            "checking for other running window managers...",
+            LogLevel::Debug,
+        );
         self.check_other_wm(self.ewmh.root)?;
 
-        println!("grabbing keys...");
         self.grab_keys();
         self.conn.send_request(&xcb::x::SetInputFocus {
             revert_to: xcb::x::InputFocus::PointerRoot,

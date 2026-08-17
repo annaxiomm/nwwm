@@ -64,6 +64,11 @@ impl Config {
                 keysym: xkb::keysyms::KEY_Return,
                 action: Action::Exec("kitty".to_string()),
             },
+            Keybind {
+                modifiers: xcb::x::ModMask::N4,
+                keysym: xkb::keysyms::KEY_n,
+                action: Action::Exec("test-unavailable-command".to_string()), // test keybind to test trying to open non-existent programs
+            },
         ];
         Self {
             border_width,

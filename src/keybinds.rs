@@ -1,6 +1,6 @@
 use xkbcommon::xkb;
 
-use crate::{err::NwwmError, tile::Layout, wm::WindowManager};
+use crate::{err::NwwmError, logger::LogLevel, tile::Layout, wm::WindowManager};
 use std::process::{Command, Stdio};
 
 #[derive(Clone)]
@@ -30,6 +30,7 @@ impl Keybind {
 
 impl WindowManager {
     pub fn grab_keys(&self) {
+        self.logger.log("grabbing keys...", LogLevel::Debug);
         for keybind in &self.config.keybinds {
             let mut keycode = None;
 
@@ -56,8 +57,8 @@ impl WindowManager {
                 });
 
                 match self.conn.check_request(cookie) {
-                    Ok(_) => println!("success!"),
-                    Err(e) => println!("error: {:?}", e),
+                    Ok(_) => {}
+                    Err(e) => eprintln!("[nwwm] error: {:?}", e),
                 }
             }
         }
@@ -77,10 +78,14 @@ impl WindowManager {
             Action::Exec(command) => {
                 let command_cloned = command.clone();
                 if let Err(_) = self.exec_command(command) {
-                    eprintln!(
-                        "[nwwm] warn: failed to spawn command {}",
-                        command_cloned.split(" ").next().unwrap()
-                    )
+                    self.logger.log(
+                        format!(
+                            "failed to spawn command \"{}\"",
+                            command_cloned.split(" ").next().unwrap()
+                        )
+                        .as_str(),
+                        LogLevel::Warn,
+                    );
                 }
             }
         };
