@@ -2,8 +2,6 @@
 // -----------
 // event handlers go here to avoid clogging up wm.rs
 
-use xkbcommon::xkb;
-
 use crate::{
     err::NwwmError,
     wm::{Window, WindowManager, WindowState, WindowType},
@@ -29,17 +27,18 @@ impl WindowManager {
         let window_type = self.get_type(types);
         let window_state = self.get_state(&window_type);
         let is_dock = matches!(&window_type, WindowType::Dock);
+        let window_struct = Window {
+            id: window,
+            workspace: self.current_workspace,
+            window_type: window_type,
+            window_state: window_state,
+        };
 
         if !is_dock {
             // don't manage dock windows
             self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
                 .windows // we still know about it
-                .push(Window {
-                    id: window,
-                    workspace: self.current_workspace,
-                    window_type,
-                    window_state,
-                });
+                .push(window_struct);
 
             // dock windows shouldn't get borders
             self.conn.send_request(&xcb::x::ConfigureWindow {
@@ -52,12 +51,15 @@ impl WindowManager {
                 value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
             });
         }
+        self.clients.push(window_struct); // global client list for EWMH
 
         self.conn.send_request(&xcb::x::MapWindow { window });
 
         if !is_dock {
             self.focus_window(window)?;
         }
+
+        self.ewmh.update_client_list(&self.conn, &self.clients);
 
         self.tile()?;
         self.conn.flush().unwrap(); // without this, nothing happens
@@ -90,10 +92,13 @@ impl WindowManager {
         for workspace in &mut self.workspaces {
             workspace.windows.retain(|w| w.id != window);
         }
+        self.clients.retain(|w| w.id != window);
 
         if let Some(new_window) = new_focus {
             self.focus_window(new_window)?;
         }
+
+        self.ewmh.update_client_list(&self.conn, &self.clients);
 
         self.tile()?;
 
@@ -169,7 +174,6 @@ impl WindowManager {
     }
 
     pub fn on_key_press(&mut self, ev: xcb::x::KeyPressEvent) -> Result<(), NwwmError> {
-        println!("something is happening");
         if let Some(keybind) = self
             .config
             .keybinds
@@ -194,8 +198,6 @@ impl WindowManager {
         if types.contains(&self.ewmh.atoms.net_wm_window_type_utility) {
             return WindowType::Utility;
         }
-
-        println!("{:?}", types);
 
         WindowType::Normal
     }

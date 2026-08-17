@@ -1,4 +1,4 @@
-use crate::{atoms::Atoms, err::NwwmError};
+use crate::{atoms::Atoms, err::NwwmError, wm::Window};
 
 #[allow(dead_code)]
 pub struct Ewmh {
@@ -63,7 +63,22 @@ impl Ewmh {
             window: self.root,
             property: self.atoms.net_supported,
             r#type: xcb::x::ATOM_ATOM,
-            data: &[self.atoms.net_supporting_wm_check, self.atoms.net_wm_name],
+            data: &[
+                self.atoms.net_supporting_wm_check,
+                self.atoms.net_wm_name,
+                self.atoms.net_client_list,
+            ],
+        });
+    }
+
+    pub fn update_client_list(&self, conn: &xcb::Connection, client_list: &[Window]) {
+        let windows: Vec<xcb::x::Window> = client_list.iter().map(|w| w.id).collect();
+        conn.send_request(&xcb::x::ChangeProperty {
+            mode: xcb::x::PropMode::Replace,
+            window: self.root,
+            property: self.atoms.net_client_list,
+            r#type: xcb::x::ATOM_WINDOW,
+            data: &windows,
         });
     }
 }

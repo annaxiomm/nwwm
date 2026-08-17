@@ -12,7 +12,7 @@ use crate::{
     tile::{self, Layout, LayoutParams},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub enum WindowType {
     Dialog,
@@ -21,11 +21,13 @@ pub enum WindowType {
     Normal,
 }
 
+#[derive(Clone, Copy)]
 pub enum WindowState {
     Tiled,
     Floating,
 }
 
+#[derive(Clone, Copy)]
 #[allow(dead_code)]
 pub struct Window {
     pub id: xcb::x::Window,
@@ -42,6 +44,7 @@ pub struct Workspace {
 pub struct WindowManager {
     pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
     pub workspaces: Vec<Workspace>, // same here
+    pub clients: Vec<Window>,
     pub ewmh: Ewmh,
     pub config: Config,
     pub current_workspace: usize,
@@ -88,6 +91,7 @@ impl WindowManager {
             windows: Vec::new(),
             layout: Layout::MasterStack,
         }];
+        let clients: Vec<Window> = Vec::new();
 
         let context = xkb::Context::new(xkb::COMPILE_NO_FLAGS);
         let xkb_keymap = xkb::Keymap::new_from_names(
@@ -105,6 +109,7 @@ impl WindowManager {
         Ok(Self {
             conn,
             workspaces,
+            clients,
             ewmh,
             config,
             logger,
