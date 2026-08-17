@@ -150,15 +150,16 @@ impl WindowManager {
             time: ev.time(),
         });
         if ev.child() != xcb::x::WINDOW_NONE {
-            match self.workspaces[self.current_workspace]
+            // if the window isn't managed don't try to focus it
+            if let Some(window) = self.workspaces[self.current_workspace]
                 .windows
                 .iter()
                 .find(|w| w.id == ev.child())
-                .unwrap()
-                .window_type
             {
-                WindowType::Dock => {}
-                _ => self.focus_window(ev.child())?,
+                match window.window_type {
+                    WindowType::Dock => {}
+                    _ => self.focus_window(ev.child())?,
+                }
             }
         }
 
