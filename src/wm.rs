@@ -9,7 +9,7 @@ use crate::{
     err::NwwmError,
     ewmh::Ewmh,
     logger::{self, LogLevel},
-    tile::{self, Layout, LayoutParams},
+    tile::{self, Layout},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -25,6 +25,13 @@ pub enum WindowType {
 pub enum WindowState {
     Tiled,
     Floating,
+}
+
+pub struct Rect {
+    pub x: i32,
+    pub y: i32,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Clone, Copy)]
@@ -52,6 +59,7 @@ pub struct WindowManager {
     pub xkb_state: xkb::State,
     pub xkb_keymap: xkb::Keymap,
     pub logger: logger::Logger,
+    pub screen_area: Rect,
     screennum: i32,
 }
 
@@ -109,6 +117,20 @@ impl WindowManager {
         .ok_or_else(|| NwwmError::XKBError)?;
         let xkb_state = xkb::State::new(&xkb_keymap);
 
+        let screen = conn
+            .get_setup()
+            .roots()
+            .nth(screennum as usize)
+            .ok_or(NwwmError::ScreenGrabError)
+            .unwrap();
+
+        let screen_area = Rect {
+            x: 0,
+            y: 0,
+            width: screen.width_in_pixels() as u32,
+            height: screen.height_in_pixels() as u32,
+        };
+
         Ok(Self {
             conn,
             workspaces,
@@ -120,6 +142,7 @@ impl WindowManager {
             xkb_state,
             xkb_keymap,
             current_workspace: 0,
+            screen_area,
             screennum,
         })
     }
@@ -185,27 +208,13 @@ impl WindowManager {
             .map(|w| w.id)
             .collect();
 
-        let tile_layout: HashMap<x::Window, LayoutParams> =
-            match self.workspaces[self.current_workspace].layout {
-                Layout::Columns => tile::columns(
-                    screen.height_in_pixels(),
-                    screen.width_in_pixels(),
-                    windows,
-                    &self.config,
-                )?,
-                Layout::Monocle => tile::monocle(
-                    screen.height_in_pixels(),
-                    screen.width_in_pixels(),
-                    windows,
-                    &self.config,
-                )?,
-                Layout::MasterStack => tile::master_stack(
-                    screen.height_in_pixels(),
-                    screen.width_in_pixels(),
-                    windows,
-                    &self.config,
-                )?,
-            };
+        let tile_layout: HashMap<x::Window, Rect> = match self.workspaces[self.current_workspace]
+            .layout
+        {
+            Layout::Columns => tile::columns(&self.screen_area, windows, &self.config)?,
+            Layout::Monocle => tile::monocle(&self.screen_area, windows, &self.config)?,
+            Layout::MasterStack => tile::master_stack(&self.screen_area, windows, &self.config)?,
+        };
 
         for (window, param) in &tile_layout {
             self.move_window(window, param.x, param.y)?;

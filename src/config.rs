@@ -8,6 +8,7 @@ pub struct Config {
     pub border_width: u32,
     pub border_focused: u32,
     pub border_unfocused: u32,
+    pub mod_key: xcb::x::ModMask,
     pub keybinds: Vec<Keybind>,
 }
 
@@ -33,29 +34,30 @@ impl Config {
         let border_width: u32 = 2;
         let border_focused = alloc_color(conn, screen, 0xffff, 0, 0);
         let border_unfocused = alloc_color(conn, screen, 0xffff, 0xffff, 0xffff);
+        let mod_key = xcb::x::ModMask::N4;
         let keybinds = vec![
             Keybind {
-                modifiers: xcb::x::ModMask::N4,
+                modifiers: mod_key,
                 keysym: xkb::keysyms::KEY_w,
                 action: Action::FocusNext,
             },
             Keybind {
-                modifiers: xcb::x::ModMask::N4,
+                modifiers: mod_key,
                 keysym: xkb::keysyms::KEY_m,
                 action: Action::SetLayout(Layout::Monocle),
             },
             Keybind {
-                modifiers: xcb::x::ModMask::N4,
+                modifiers: mod_key,
                 keysym: xkb::keysyms::KEY_s,
                 action: Action::SetLayout(Layout::MasterStack),
             },
             Keybind {
-                modifiers: xcb::x::ModMask::N4,
+                modifiers: mod_key,
                 keysym: xkb::keysyms::KEY_c,
                 action: Action::CloseWindow,
             },
             Keybind {
-                modifiers: xcb::x::ModMask::N4,
+                modifiers: mod_key,
                 keysym: xkb::keysyms::KEY_r,
                 action: Action::Exec("rofi -show run".to_string()),
             },
@@ -74,6 +76,7 @@ impl Config {
             border_width,
             border_focused,
             border_unfocused,
+            mod_key,
             keybinds,
         }
     }

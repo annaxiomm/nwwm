@@ -1,4 +1,8 @@
-use crate::{config::Config, err::NwwmError};
+use crate::{
+    config::{self, Config},
+    err::NwwmError,
+    wm::Rect,
+};
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug)]
@@ -8,34 +12,25 @@ pub enum Layout {
     MasterStack,
 }
 
-#[derive(Debug)]
-pub struct LayoutParams {
-    pub x: i32,
-    pub y: i32,
-    pub width: u32,
-    pub height: u32,
-}
-
 pub fn monocle(
-    scheight: u16,
-    scwidth: u16,
+    screen: &Rect,
     windows: Vec<xcb::x::Window>,
     config: &Config,
-) -> Result<HashMap<xcb::x::Window, LayoutParams>, NwwmError> {
+) -> Result<HashMap<xcb::x::Window, Rect>, NwwmError> {
     let mut layoutmap = HashMap::new();
 
     let border_width = config.border_width;
-    let window_width = scwidth as u32 - (2 * border_width);
-    let window_height = scheight as u32 - (2 * border_width);
+    let window_width = screen.width - (2 * border_width);
+    let window_height = screen.height - (2 * border_width);
 
     for window in windows.into_iter() {
         layoutmap.insert(
             window,
-            LayoutParams {
+            Rect {
                 x: 0,
                 y: 0,
-                height: window_height,
                 width: window_width,
+                height: window_height,
             },
         );
     }
@@ -44,11 +39,10 @@ pub fn monocle(
 }
 
 pub fn columns(
-    scheight: u16,
-    scwidth: u16,
+    screen: &Rect,
     windows: Vec<xcb::x::Window>,
     config: &Config,
-) -> Result<HashMap<xcb::x::Window, LayoutParams>, NwwmError> {
+) -> Result<HashMap<xcb::x::Window, Rect>, NwwmError> {
     let mut layoutmap = HashMap::new();
 
     let window_count = windows.len();
@@ -57,7 +51,7 @@ pub fn columns(
     }
     let border_width = config.border_width;
 
-    let available_width = scwidth as u32;
+    let available_width = screen.width;
     let slot_width = available_width / window_count as u32;
 
     let mut x = 0;
@@ -74,11 +68,11 @@ pub fn columns(
 
         layoutmap.insert(
             window,
-            LayoutParams {
+            Rect {
                 x,
                 y: 0,
                 width: client_width,
-                height: scheight as u32 - 2 * border_width,
+                height: screen.height as u32 - 2 * border_width,
             },
         );
 
@@ -89,11 +83,10 @@ pub fn columns(
 }
 
 pub fn master_stack(
-    scheight: u16,
-    scwidth: u16,
+    screen: &Rect,
     windows: Vec<xcb::x::Window>,
     config: &Config,
-) -> Result<HashMap<xcb::x::Window, LayoutParams>, NwwmError> {
+) -> Result<HashMap<xcb::x::Window, Rect>, NwwmError> {
     let mut layoutmap = HashMap::new();
     let window_count = windows.len();
 
@@ -102,14 +95,14 @@ pub fn master_stack(
         return Ok(layoutmap);
     }
 
-    let screen_width = scwidth as u32;
-    let screen_height = scheight as u32;
+    let screen_width = screen.width;
+    let screen_height = screen.height;
 
     // if theres just a master - no stack
     if window_count == 1 {
         layoutmap.insert(
             windows[0],
-            LayoutParams {
+            Rect {
                 x: 0,
                 y: 0,
                 width: screen_width - (2 * config.border_width),
@@ -126,7 +119,7 @@ pub fn master_stack(
 
     layoutmap.insert(
         windows[0],
-        LayoutParams {
+        Rect {
             x: 0,
             y: 0,
             width: master_width - (2 * config.border_width),
@@ -149,9 +142,9 @@ pub fn master_stack(
 
         layoutmap.insert(
             window,
-            LayoutParams {
+            Rect {
                 x: master_width as i32,
-                y: y,
+                y,
                 width: stack_width - 2 * config.border_width,
                 height: client_height,
             },
