@@ -50,6 +50,8 @@ impl WindowManager {
                 window,
                 value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
             });
+        } else {
+            self.handle_dock(window);
         }
         self.clients.push(window_struct); // global client list for EWMH
 
@@ -208,4 +210,6 @@ impl WindowManager {
             WindowType::Normal => WindowState::Tiled,
         }
     }
+
+    fn handle_dock(&self, window: xcb::x::Window) {}
 }

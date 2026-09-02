@@ -67,6 +67,7 @@ impl Ewmh {
                 self.atoms.net_supporting_wm_check,
                 self.atoms.net_wm_name,
                 self.atoms.net_client_list,
+                self.atoms.net_active_window,
             ],
         });
     }
@@ -79,6 +80,16 @@ impl Ewmh {
             property: self.atoms.net_client_list,
             r#type: xcb::x::ATOM_WINDOW,
             data: &windows,
+        });
+    }
+
+    pub fn set_active_window(&self, conn: &xcb::Connection, active: xcb::x::Window) {
+        conn.send_request(&xcb::x::ChangeProperty {
+            mode: xcb::x::PropMode::Replace,
+            window: self.root,
+            property: self.atoms.net_active_window,
+            r#type: xcb::x::ATOM_WINDOW,
+            data: &[active],
         });
     }
 }

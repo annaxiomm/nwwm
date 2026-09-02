@@ -247,6 +247,8 @@ impl WindowManager {
 
         self.focused = Some(window);
 
+        self.ewmh.set_active_window(&self.conn, window);
+
         self.conn.flush().unwrap();
 
         Ok(())
