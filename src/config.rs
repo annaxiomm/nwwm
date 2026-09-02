@@ -35,6 +35,7 @@ impl Config {
         let border_width: u32 = 2;
         let border_focused = alloc_color(conn, screen, 0xffff, 0, 0);
         let border_unfocused = alloc_color(conn, screen, 0xffff, 0xffff, 0xffff);
+
         let mod_key = xcb::x::ModMask::N4;
         let keybinds = vec![
             Keybind {
@@ -66,6 +67,11 @@ impl Config {
                 modifiers: xcb::x::ModMask::N4,
                 keysym: xkb::keysyms::KEY_Return,
                 action: Action::Exec("kitty".to_string()),
+            },
+            Keybind {
+                modifiers: mod_key | xcb::x::ModMask::SHIFT,
+                keysym: xkb::keysyms::KEY_q,
+                action: Action::Quit,
             },
             Keybind {
                 modifiers: xcb::x::ModMask::N4,

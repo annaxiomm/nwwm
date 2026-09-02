@@ -60,6 +60,7 @@ pub struct WindowManager {
     pub xkb_keymap: xkb::Keymap,
     pub logger: logger::Logger,
     pub screen_area: Rect,
+    pub should_quit: bool,
     _screennum: i32,
 }
 
@@ -136,6 +137,7 @@ impl WindowManager {
             xkb_keymap,
             current_workspace: 0,
             screen_area,
+            should_quit: false,
             _screennum: screennum,
         })
     }
@@ -181,6 +183,10 @@ impl WindowManager {
                     println!("{err}");
                     return Err(NwwmError::XCBConnError);
                 }
+            }
+
+            if self.should_quit {
+                return Ok(());
             }
         }
     }
@@ -322,6 +328,11 @@ impl WindowManager {
         });
 
         Ok(())
+    }
+
+    pub fn quit(&mut self) {
+        self.logger.log("goodbye !", LogLevel::Info);
+        self.should_quit = true;
     }
 
     fn _get_window(&self, id: x::Window) -> Option<&Window> {

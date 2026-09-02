@@ -9,6 +9,8 @@ pub enum Action {
     CloseWindow,
     SetLayout(Layout),
     Exec(String),
+
+    Quit,
 }
 
 pub struct Keybind {
@@ -87,6 +89,9 @@ impl WindowManager {
                         LogLevel::Warn,
                     );
                 }
+            }
+            Action::Quit => {
+                self.quit();
             }
         };
         Ok(())
