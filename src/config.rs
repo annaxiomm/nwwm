@@ -4,6 +4,7 @@ use crate::{
 };
 use xkbcommon::xkb;
 
+#[allow(dead_code)]
 pub struct Config {
     pub border_width: u32,
     pub border_focused: u32,

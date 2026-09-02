@@ -60,7 +60,7 @@ pub struct WindowManager {
     pub xkb_keymap: xkb::Keymap,
     pub logger: logger::Logger,
     pub screen_area: Rect,
-    screennum: i32,
+    _screennum: i32,
 }
 
 impl WindowManager {
@@ -95,7 +95,7 @@ impl WindowManager {
         ewmh.setup(&conn);
 
         logger.log("initialisting config...", LogLevel::Debug);
-        let config = Config::new(&conn, &screen);
+        let config = Config::new(&conn, screen);
 
         let workspaces: Vec<Workspace> = vec![Workspace {
             windows: Vec::new(),
@@ -114,15 +114,8 @@ impl WindowManager {
             None,
             xkb::KEYMAP_COMPILE_NO_FLAGS,
         )
-        .ok_or_else(|| NwwmError::XKBError)?;
+        .ok_or(NwwmError::XKBError)?;
         let xkb_state = xkb::State::new(&xkb_keymap);
-
-        let screen = conn
-            .get_setup()
-            .roots()
-            .nth(screennum as usize)
-            .ok_or(NwwmError::ScreenGrabError)
-            .unwrap();
 
         let screen_area = Rect {
             x: 0,
@@ -143,7 +136,7 @@ impl WindowManager {
             xkb_keymap,
             current_workspace: 0,
             screen_area,
-            screennum,
+            _screennum: screennum,
         })
     }
 
@@ -193,14 +186,6 @@ impl WindowManager {
     }
 
     pub fn tile(&mut self) -> Result<(), NwwmError> {
-        let screen = self
-            .conn
-            .get_setup()
-            .roots()
-            .nth(self.screennum as usize)
-            .ok_or(NwwmError::ScreenGrabError)
-            .unwrap();
-
         let windows: Vec<xcb::x::Window> = self.workspaces[self.current_workspace]
             .windows
             .iter()
@@ -339,7 +324,7 @@ impl WindowManager {
         Ok(())
     }
 
-    fn get_window(&self, id: x::Window) -> Option<&Window> {
+    fn _get_window(&self, id: x::Window) -> Option<&Window> {
         self.workspaces
             .iter()
             .flat_map(|ws| ws.windows.iter())

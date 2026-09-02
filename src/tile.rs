@@ -1,11 +1,8 @@
-use crate::{
-    config::{self, Config},
-    err::NwwmError,
-    wm::Rect,
-};
+use crate::{config::Config, err::NwwmError, wm::Rect};
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug)]
+#[allow(dead_code)]
 pub enum Layout {
     Columns,
     Monocle,
@@ -72,7 +69,7 @@ pub fn columns(
                 x,
                 y: 0,
                 width: client_width,
-                height: screen.height as u32 - 2 * border_width,
+                height: screen.height - 2 * border_width,
             },
         );
 

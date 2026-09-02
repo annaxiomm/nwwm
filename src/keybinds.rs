@@ -77,7 +77,7 @@ impl WindowManager {
             }
             Action::Exec(command) => {
                 let command_cloned = command.clone();
-                if let Err(_) = self.exec_command(command) {
+                if self.exec_command(command).is_err() {
                     self.logger.log(
                         format!(
                             "failed to spawn command \"{}\"",

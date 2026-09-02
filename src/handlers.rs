@@ -13,7 +13,7 @@ impl WindowManager {
 
         let cookie = self.conn.send_request(&xcb::x::GetProperty {
             delete: false,
-            window: window,
+            window,
             property: self.ewmh.atoms.net_wm_window_type,
             r#type: xcb::x::ATOM_ATOM,
             long_offset: 0,
@@ -30,8 +30,8 @@ impl WindowManager {
         let window_struct = Window {
             id: window,
             workspace: self.current_workspace,
-            window_type: window_type,
-            window_state: window_state,
+            window_type,
+            window_state,
         };
 
         if !is_dock {
@@ -112,7 +112,7 @@ impl WindowManager {
         let window = ev.window();
         let cookie = self.conn.send_request(&xcb::x::GetProperty {
             delete: false,
-            window: window,
+            window,
             property: self.ewmh.atoms.net_wm_window_type,
             r#type: xcb::x::ATOM_ATOM,
             long_offset: 0,
