@@ -43,6 +43,18 @@ pub struct Window {
     pub window_state: WindowState,
 }
 
+pub struct Strut {
+    pub left: u32,
+    pub right: u32,
+    pub top: u32,
+    pub bottom: u32,
+}
+
+pub struct Dock {
+    pub id: xcb::x::Window,
+    pub strut: Strut,
+}
+
 pub struct Workspace {
     pub windows: Vec<Window>,
     pub layout: Layout,
@@ -52,6 +64,7 @@ pub struct WindowManager {
     pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
     pub workspaces: Vec<Workspace>, // same here
     pub clients: Vec<Window>,
+    pub docks: Vec<Dock>,
     pub ewmh: Ewmh,
     pub config: Config,
     pub current_workspace: usize,
@@ -103,6 +116,7 @@ impl WindowManager {
             layout: Layout::MasterStack,
         }];
         let clients: Vec<Window> = Vec::new();
+        let docks: Vec<Dock> = Vec::new();
 
         logger.log("initialising xkb...", LogLevel::Debug);
         let context = xkb::Context::new(xkb::COMPILE_NO_FLAGS);
@@ -129,6 +143,7 @@ impl WindowManager {
             conn,
             workspaces,
             clients,
+            docks,
             ewmh,
             config,
             logger,
@@ -292,6 +307,20 @@ impl WindowManager {
         self.tile()?;
 
         Ok(())
+    }
+
+    pub fn recalculate_screen_area(&mut self) {
+        let left = self.docks.iter().map(|d| d.strut.left).max().unwrap_or(0);
+        let right = self.docks.iter().map(|d| d.strut.right).max().unwrap_or(0);
+        let top = self.docks.iter().map(|d| d.strut.top).max().unwrap_or(0);
+        let bottom = self.docks.iter().map(|d| d.strut.bottom).max().unwrap_or(0);
+
+        self.screen_area = Rect {
+            x: left as i32,
+            y: top as i32,
+            width: self.screen_area.width - (left + right),
+            height: self.screen_area.height - (top + bottom),
+        };
     }
 
     fn check_other_wm(&self, root: xcb::x::Window) -> Result<(), NwwmError> {

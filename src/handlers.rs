@@ -4,68 +4,32 @@
 
 use crate::{
     err::NwwmError,
-    wm::{Window, WindowManager, WindowState, WindowType},
+    wm::{Dock, Strut, Window, WindowManager, WindowState, WindowType},
 };
 
 impl WindowManager {
     pub fn on_map_request(&mut self, ev: xcb::x::MapRequestEvent) -> Result<(), NwwmError> {
         let window = ev.window();
+        let window_type = self.get_window_type(window)?;
 
-        let cookie = self.conn.send_request(&xcb::x::GetProperty {
-            delete: false,
-            window,
-            property: self.ewmh.atoms.net_wm_window_type,
-            r#type: xcb::x::ATOM_ATOM,
-            long_offset: 0,
-            long_length: 32,
-        });
-        let reply = self
-            .conn
-            .wait_for_reply(cookie)
-            .map_err(|_| NwwmError::MapError)?;
-        let types: &[xcb::x::Atom] = reply.value();
-        let window_type = self.get_type(types);
-        let window_state = self.get_state(&window_type);
-        let is_dock = matches!(&window_type, WindowType::Dock);
-        let window_struct = Window {
-            id: window,
-            workspace: self.current_workspace,
-            window_type,
-            window_state,
-        };
-
-        if !is_dock {
-            // don't manage dock windows
-            self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
-                .windows // we still know about it
-                .push(window_struct);
-
-            // dock windows shouldn't get borders
-            self.conn.send_request(&xcb::x::ConfigureWindow {
-                window,
-                value_list: &[xcb::x::ConfigWindow::BorderWidth(2)],
-            });
-
-            self.conn.send_request(&xcb::x::ChangeWindowAttributes {
-                window,
-                value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
-            });
-        } else {
+        if matches!(window_type, WindowType::Dock) {
             self.handle_dock(window);
+            self.map_window(window);
+
+            self.recalculate_screen_area();
+            self.tile()?;
+
+            self.conn.flush().unwrap();
+            return Ok(());
         }
-        self.clients.push(window_struct); // global client list for EWMH
 
-        self.conn.send_request(&xcb::x::MapWindow { window });
-
-        if !is_dock {
-            self.focus_window(window)?;
-        }
-
+        self.handle_window(window, window_type);
+        self.map_window(window);
+        self.focus_window(window)?;
         self.ewmh.update_client_list(&self.conn, &self.clients);
 
         self.tile()?;
-        self.conn.flush().unwrap(); // without this, nothing happens
-
+        self.conn.flush().unwrap();
         Ok(())
     }
 
@@ -204,6 +168,36 @@ impl WindowManager {
         WindowType::Normal
     }
 
+    fn get_window_type(&self, window: xcb::x::Window) -> Result<WindowType, NwwmError> {
+        let cookie = self.conn.send_request(&xcb::x::GetProperty {
+            delete: false,
+            window,
+            property: self.ewmh.atoms.net_wm_window_type,
+            r#type: xcb::x::ATOM_ATOM,
+            long_offset: 0,
+            long_length: 32,
+        });
+
+        let reply = self
+            .conn
+            .wait_for_reply(cookie)
+            .map_err(|_| NwwmError::MapError)?;
+
+        let types: &[xcb::x::Atom] = reply.value();
+
+        if types.contains(&self.ewmh.atoms.net_wm_window_type_dialog) {
+            return Ok(WindowType::Dialog);
+        }
+        if types.contains(&self.ewmh.atoms.net_wm_window_type_dock) {
+            return Ok(WindowType::Dock);
+        }
+        if types.contains(&self.ewmh.atoms.net_wm_window_type_utility) {
+            return Ok(WindowType::Utility);
+        }
+
+        Ok(WindowType::Normal)
+    }
+
     fn get_state(&self, window_type: &WindowType) -> WindowState {
         match window_type {
             WindowType::Dock | WindowType::Dialog | WindowType::Utility => WindowState::Floating,
@@ -211,5 +205,56 @@ impl WindowManager {
         }
     }
 
-    fn handle_dock(&self, window: xcb::x::Window) {}
+    fn map_window(&self, window: xcb::x::Window) {
+        self.conn.send_request(&xcb::x::MapWindow { window });
+    }
+
+    fn handle_window(&mut self, window: xcb::x::Window, window_type: WindowType) {
+        let window_state = self.get_state(&window_type);
+        let window_struct = Window {
+            id: window,
+            workspace: self.current_workspace,
+            window_type,
+            window_state,
+        };
+
+        self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
+            .windows // we still know about it
+            .push(window_struct);
+
+        // dock windows shouldn't get borders
+        self.conn.send_request(&xcb::x::ConfigureWindow {
+            window,
+            value_list: &[xcb::x::ConfigWindow::BorderWidth(2)],
+        });
+
+        self.conn.send_request(&xcb::x::ChangeWindowAttributes {
+            window,
+            value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
+        });
+        self.clients.push(window_struct); // global client list for EWMH
+    }
+
+    fn handle_dock(&mut self, window: xcb::x::Window) {
+        let cookie = self.conn.send_request(&xcb::x::GetProperty {
+            delete: false,
+            window,
+            property: self.ewmh.atoms.net_wm_strut_partial,
+            r#type: xcb::x::ATOM_CARDINAL,
+            long_offset: 0,
+            long_length: 12,
+        });
+
+        let reply = self.conn.wait_for_reply(cookie).unwrap();
+        let values: &[u32] = reply.value();
+
+        let strut = Strut {
+            left: values[0],
+            right: values[1],
+            top: values[2],
+            bottom: values[3],
+        };
+
+        self.docks.push(Dock { id: window, strut });
+    }
 }
