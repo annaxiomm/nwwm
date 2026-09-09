@@ -47,7 +47,7 @@ If you want to make changes to the test script feel free, but **for the love of 
 - [x] _NET_NUMBER_OF_DESKTOPS
 - [ ] _NET_DESKTOP_GEOMETRY
 - [ ] _NET_DESKTOP_VIEWPORT
-- [ ] _NET_CURRENT_DESKTOP
+- [x] _NET_CURRENT_DESKTOP
 - [ ] _NET_DESKTOP_NAMES
 ### etc
 - [ ] _NET_ACTIVE_WINDOW

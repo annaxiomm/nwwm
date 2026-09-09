@@ -103,4 +103,14 @@ impl Ewmh {
             data: &[number_desktops],
         });
     }
+
+    pub fn update_current_desktop(&self, conn: &xcb::Connection, desktop: u32) {
+        conn.send_request(&xcb::x::ChangeProperty {
+            mode: xcb::x::PropMode::Replace,
+            window: self.root,
+            property: self.atoms.net_current_desktop,
+            r#type: xcb::x::ATOM_CARDINAL,
+            data: &[desktop],
+        });
+    }
 }

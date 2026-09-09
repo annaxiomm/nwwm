@@ -19,6 +19,7 @@ pub struct Atoms {
     pub net_client_list: x::Atom,
     pub net_active_window: x::Atom,
     pub net_number_of_desktops: x::Atom,
+    pub net_current_desktop: x::Atom,
 
     pub net_wm_window_type: x::Atom,
     pub net_wm_window_type_dialog: x::Atom,
@@ -40,6 +41,7 @@ impl Atoms {
             net_client_list: intern_atom(conn, "_NET_CLIENT_LIST")?,
             net_active_window: intern_atom(conn, "_NET_ACTIVE_WINDOW")?,
             net_number_of_desktops: intern_atom(conn, "_NET_NUMBER_OF_DESKTOPS")?,
+            net_current_desktop: intern_atom(conn, "_NET_CURRENT_DESKTOP")?,
 
             net_wm_window_type: intern_atom(conn, "_NET_WM_WINDOW_TYPE")?,
             net_wm_window_type_dialog: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DIALOG")?,

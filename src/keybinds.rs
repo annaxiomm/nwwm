@@ -122,6 +122,9 @@ impl WindowManager {
             self.unfocus();
         }
 
+        self.ewmh
+            .update_current_desktop(&self.conn, self.current_workspace as u32);
+
         self.tile()?;
 
         Ok(())
