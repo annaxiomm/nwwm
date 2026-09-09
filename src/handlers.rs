@@ -36,37 +36,39 @@ impl WindowManager {
     pub fn on_destroy_notify(&mut self, ev: xcb::x::DestroyNotifyEvent) -> Result<(), NwwmError> {
         let window = ev.window();
         let windows = &self.workspaces[self.current_workspace].windows;
-        let new_focus = if self.focused == Some(window) {
-            windows
-                .iter()
-                .position(|w| w.id == window)
-                .and_then(|position| {
-                    position
-                        .checked_sub(1)
-                        .and_then(|prev| windows.get(prev))
-                        .or_else(|| windows.get(position + 1))
-                })
-                .map(|w| w.id)
-        } else {
-            None
-        };
 
-        if Some(window) == self.focused {
-            self.focused = None;
+        // managed windows
+        if windows.iter().any(|w| w.id == window) {
+            self.destroy_managed_window(window)?;
+            self.ewmh.update_client_list(&self.conn, &self.clients);
+
+            self.tile()?;
+
+            return Ok(());
         }
 
-        for workspace in &mut self.workspaces {
-            workspace.windows.retain(|w| w.id != window);
+        // dock windows
+        if self.docks.iter().any(|d| d.id == window) {
+            println!("dock window is being deleted!");
+            self.docks.retain(|d| d.id != window);
+            self.recalculate_screen_area();
+
+            println!("destroyed window: {:?}", window);
+            println!(
+                "docks: {:?}",
+                self.docks.iter().map(|d| d.id).collect::<Vec<_>>()
+            );
+            println!(
+                "windows: {:?}",
+                self.workspaces[self.current_workspace]
+                    .windows
+                    .iter()
+                    .map(|w| w.id)
+                    .collect::<Vec<_>>()
+            );
+            self.tile()?;
+            return Ok(());
         }
-        self.clients.retain(|w| w.id != window);
-
-        if let Some(new_window) = new_focus {
-            self.focus_window(new_window)?;
-        }
-
-        self.ewmh.update_client_list(&self.conn, &self.clients);
-
-        self.tile()?;
 
         Ok(())
     }
@@ -207,6 +209,39 @@ impl WindowManager {
 
     fn map_window(&self, window: xcb::x::Window) {
         self.conn.send_request(&xcb::x::MapWindow { window });
+    }
+
+    fn destroy_managed_window(&mut self, window: xcb::x::Window) -> Result<(), NwwmError> {
+        let windows = &self.workspaces[self.current_workspace].windows;
+        let new_focus = if self.focused == Some(window) {
+            windows
+                .iter()
+                .position(|w| w.id == window)
+                .and_then(|position| {
+                    position
+                        .checked_sub(1)
+                        .and_then(|prev| windows.get(prev))
+                        .or_else(|| windows.get(position + 1))
+                })
+                .map(|w| w.id)
+        } else {
+            None
+        };
+
+        if Some(window) == self.focused {
+            self.focused = None;
+        }
+
+        for workspace in &mut self.workspaces {
+            workspace.windows.retain(|w| w.id != window);
+        }
+        self.clients.retain(|w| w.id != window);
+
+        if let Some(new_window) = new_focus {
+            self.focus_window(new_window)?;
+        };
+
+        Ok(())
     }
 
     fn handle_window(&mut self, window: xcb::x::Window, window_type: WindowType) {

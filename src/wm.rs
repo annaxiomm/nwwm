@@ -223,12 +223,12 @@ impl WindowManager {
         };
 
         for (window, param) in &tile_layout {
+            println!("tiling window {:?}", window);
             self.move_window(window, param.x, param.y)?;
             self.resize_window(window, param.width, param.height)?;
         }
 
         self.conn.flush().unwrap();
-
         Ok(())
     }
 
@@ -310,6 +310,14 @@ impl WindowManager {
     }
 
     pub fn recalculate_screen_area(&mut self) {
+        let screen = self
+            .conn
+            .get_setup()
+            .roots()
+            .nth(self._screennum as usize)
+            .ok_or(NwwmError::ScreenGrabError)
+            .unwrap();
+
         let left = self.docks.iter().map(|d| d.strut.left).max().unwrap_or(0);
         let right = self.docks.iter().map(|d| d.strut.right).max().unwrap_or(0);
         let top = self.docks.iter().map(|d| d.strut.top).max().unwrap_or(0);
@@ -318,8 +326,8 @@ impl WindowManager {
         self.screen_area = Rect {
             x: left as i32,
             y: top as i32,
-            width: self.screen_area.width - (left + right),
-            height: self.screen_area.height - (top + bottom),
+            width: screen.width_in_pixels() as u32 - (left + right),
+            height: screen.height_in_pixels() as u32 - (top + bottom),
         };
     }
 
@@ -341,22 +349,31 @@ impl WindowManager {
     }
 
     fn move_window(&self, window: &x::Window, x: i32, y: i32) -> Result<(), NwwmError> {
-        self.conn.send_request(&xcb::x::ConfigureWindow {
+        let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window: *window,
             value_list: &[xcb::x::ConfigWindow::X(x), xcb::x::ConfigWindow::Y(y)],
         });
+
+        if let Err(e) = self.conn.check_request(cookie) {
+            println!("{:?}", e);
+        }
 
         Ok(())
     }
 
     fn resize_window(&self, window: &x::Window, width: u32, height: u32) -> Result<(), NwwmError> {
-        self.conn.send_request(&xcb::x::ConfigureWindow {
+        println!("resizing {:?} to {}x{}", window, width, height);
+        let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window: *window,
             value_list: &[
                 xcb::x::ConfigWindow::Width(width),
                 xcb::x::ConfigWindow::Height(height),
             ],
         });
+
+        if let Err(e) = self.conn.check_request(cookie) {
+            println!("{:?}", e);
+        }
 
         Ok(())
     }
