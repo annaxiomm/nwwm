@@ -195,7 +195,7 @@ impl WindowManager {
                 },
 
                 Err(err) => {
-                    println!("{err}");
+                    println!("{err:?}");
                     return Err(NwwmError::XCBConnError);
                 }
             }
@@ -229,6 +229,7 @@ impl WindowManager {
         }
 
         self.conn.flush().unwrap();
+        println!("tile completed successfully");
         Ok(())
     }
 
@@ -242,6 +243,8 @@ impl WindowManager {
             focus: window,
             time: xcb::x::CURRENT_TIME,
         });
+
+        println!("CONFIGURE: focus_window {window:?}");
 
         self.conn.send_request(&xcb::x::ConfigureWindow {
             window,
@@ -349,6 +352,7 @@ impl WindowManager {
     }
 
     fn move_window(&self, window: &x::Window, x: i32, y: i32) -> Result<(), NwwmError> {
+        println!("CONFIGURE: move_window {window:?}");
         let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window: *window,
             value_list: &[xcb::x::ConfigWindow::X(x), xcb::x::ConfigWindow::Y(y)],
@@ -363,6 +367,7 @@ impl WindowManager {
 
     fn resize_window(&self, window: &x::Window, width: u32, height: u32) -> Result<(), NwwmError> {
         println!("resizing {:?} to {}x{}", window, width, height);
+        println!("CONFIGURE: resize_window {window:?}");
         let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window: *window,
             value_list: &[

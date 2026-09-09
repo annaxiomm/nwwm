@@ -1,5 +1,7 @@
 use std::fmt;
 
+use xcb::ConnError;
+
 #[derive(Debug)]
 pub enum NwwmError {
     DisplayUnavailable,

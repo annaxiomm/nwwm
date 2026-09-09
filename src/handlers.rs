@@ -66,6 +66,7 @@ impl WindowManager {
                     .map(|w| w.id)
                     .collect::<Vec<_>>()
             );
+            println!("Focused window: {:?}", self.focused);
             self.tile()?;
             return Ok(());
         }
@@ -78,20 +79,17 @@ impl WindowManager {
         ev: xcb::x::ConfigureRequestEvent,
     ) -> Result<(), NwwmError> {
         let window = ev.window();
-        let cookie = self.conn.send_request(&xcb::x::GetProperty {
-            delete: false,
-            window,
-            property: self.ewmh.atoms.net_wm_window_type,
-            r#type: xcb::x::ATOM_ATOM,
-            long_offset: 0,
-            long_length: 32,
-        });
-        let reply = self
-            .conn
-            .wait_for_reply(cookie)
-            .map_err(|_| NwwmError::MapError)?;
-        let types: &[xcb::x::Atom] = reply.value();
-        let window_type = self.get_type(types);
+
+        if !self
+            .workspaces
+            .iter()
+            .any(|ws| ws.windows.iter().any(|w| w.id == window))
+            && !self.docks.iter().any(|d| d.id == window)
+        {
+            return Ok(());
+        }
+
+        let window_type = self.get_window_type(window)?;
         let window_state = self.get_state(&window_type);
 
         if matches!(window_state, WindowState::Floating) {
@@ -108,11 +106,19 @@ impl WindowManager {
             if ev.value_mask().contains(xcb::x::ConfigWindowMask::HEIGHT) {
                 values.push(xcb::x::ConfigWindow::Height(ev.height() as u32));
             }
-            self.conn.send_request(&xcb::x::ConfigureWindow {
+
+            println!("CONFIGURE: on_config_request {window:?}");
+            let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
                 window,
                 value_list: &values,
             });
+
+            if let Err(e) = self.conn.check_request(cookie) {
+                println!("{e:?}");
+            }
         }
+
+        self.conn.flush().unwrap();
 
         Ok(())
     }
@@ -256,6 +262,8 @@ impl WindowManager {
         self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
             .windows // we still know about it
             .push(window_struct);
+
+        println!("CONFIGURE: handle_window {window:?}");
 
         // dock windows shouldn't get borders
         self.conn.send_request(&xcb::x::ConfigureWindow {
