@@ -202,6 +202,9 @@ impl WindowManager {
                     xcb::Event::X(x::Event::ButtonPress(event)) => {
                         self.on_button_press(event)?;
                     }
+                    xcb::Event::X(x::Event::ClientMessage(event)) => {
+                        self.on_client_message(event)?;
+                    }
 
                     _ => {}
                 },

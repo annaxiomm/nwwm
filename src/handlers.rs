@@ -142,6 +142,18 @@ impl WindowManager {
         Ok(())
     }
 
+    pub fn on_client_message(&mut self, ev: xcb::x::ClientMessageEvent) -> Result<(), NwwmError> {
+        let event_type = ev.r#type();
+
+        if event_type == self.ewmh.atoms.net_current_desktop
+            && let xcb::x::ClientMessageData::Data32(data) = ev.data()
+        {
+            self.switch_workspace(data[0] as usize + 1)?;
+        }
+
+        Ok(())
+    }
+
     fn get_window_type(&self, window: xcb::x::Window) -> Result<WindowType, NwwmError> {
         let cookie = self.conn.send_request(&xcb::x::GetProperty {
             delete: false,
