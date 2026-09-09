@@ -49,24 +49,8 @@ impl WindowManager {
 
         // dock windows
         if self.docks.iter().any(|d| d.id == window) {
-            println!("dock window is being deleted!");
             self.docks.retain(|d| d.id != window);
             self.recalculate_screen_area();
-
-            println!("destroyed window: {:?}", window);
-            println!(
-                "docks: {:?}",
-                self.docks.iter().map(|d| d.id).collect::<Vec<_>>()
-            );
-            println!(
-                "windows: {:?}",
-                self.workspaces[self.current_workspace]
-                    .windows
-                    .iter()
-                    .map(|w| w.id)
-                    .collect::<Vec<_>>()
-            );
-            println!("Focused window: {:?}", self.focused);
             self.tile()?;
             return Ok(());
         }
@@ -106,15 +90,13 @@ impl WindowManager {
             if ev.value_mask().contains(xcb::x::ConfigWindowMask::HEIGHT) {
                 values.push(xcb::x::ConfigWindow::Height(ev.height() as u32));
             }
-
-            println!("CONFIGURE: on_config_request {window:?}");
             let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
                 window,
                 value_list: &values,
             });
 
             if let Err(e) = self.conn.check_request(cookie) {
-                println!("{e:?}");
+                println!("ConfigureWindow failed: {e:?}");
             }
         }
 
@@ -158,22 +140,6 @@ impl WindowManager {
         }
 
         Ok(())
-    }
-
-    fn get_type(&self, types: &[xcb::x::Atom]) -> WindowType {
-        if types.contains(&self.ewmh.atoms.net_wm_window_type_dialog) {
-            return WindowType::Dialog;
-        }
-
-        if types.contains(&self.ewmh.atoms.net_wm_window_type_dock) {
-            return WindowType::Dock;
-        }
-
-        if types.contains(&self.ewmh.atoms.net_wm_window_type_utility) {
-            return WindowType::Utility;
-        }
-
-        WindowType::Normal
     }
 
     fn get_window_type(&self, window: xcb::x::Window) -> Result<WindowType, NwwmError> {
@@ -262,8 +228,6 @@ impl WindowManager {
         self.workspaces[self.current_workspace] // Add to workspace before mapping so if MapWindow fails,
             .windows // we still know about it
             .push(window_struct);
-
-        println!("CONFIGURE: handle_window {window:?}");
 
         // dock windows shouldn't get borders
         self.conn.send_request(&xcb::x::ConfigureWindow {

@@ -195,7 +195,7 @@ impl WindowManager {
                 },
 
                 Err(err) => {
-                    println!("{err:?}");
+                    println!("Unknown error encountered: {err:?}");
                     return Err(NwwmError::XCBConnError);
                 }
             }
@@ -223,13 +223,11 @@ impl WindowManager {
         };
 
         for (window, param) in &tile_layout {
-            println!("tiling window {:?}", window);
             self.move_window(window, param.x, param.y)?;
             self.resize_window(window, param.width, param.height)?;
         }
 
         self.conn.flush().unwrap();
-        println!("tile completed successfully");
         Ok(())
     }
 
@@ -244,12 +242,14 @@ impl WindowManager {
             time: xcb::x::CURRENT_TIME,
         });
 
-        println!("CONFIGURE: focus_window {window:?}");
-
-        self.conn.send_request(&xcb::x::ConfigureWindow {
+        let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window,
             value_list: &[xcb::x::ConfigWindow::StackMode(xcb::x::StackMode::Above)],
         });
+
+        if let Err(e) = self.conn.check_request(cookie) {
+            println!("ConfigureWindow failed: {e}");
+        }
 
         self.conn.send_request(&xcb::x::ChangeWindowAttributes {
             window,
@@ -352,22 +352,19 @@ impl WindowManager {
     }
 
     fn move_window(&self, window: &x::Window, x: i32, y: i32) -> Result<(), NwwmError> {
-        println!("CONFIGURE: move_window {window:?}");
         let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window: *window,
             value_list: &[xcb::x::ConfigWindow::X(x), xcb::x::ConfigWindow::Y(y)],
         });
 
         if let Err(e) = self.conn.check_request(cookie) {
-            println!("{:?}", e);
+            println!("ConfigureWindow failed: {:?}", e);
         }
 
         Ok(())
     }
 
     fn resize_window(&self, window: &x::Window, width: u32, height: u32) -> Result<(), NwwmError> {
-        println!("resizing {:?} to {}x{}", window, width, height);
-        println!("CONFIGURE: resize_window {window:?}");
         let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window: *window,
             value_list: &[
@@ -377,7 +374,7 @@ impl WindowManager {
         });
 
         if let Err(e) = self.conn.check_request(cookie) {
-            println!("{:?}", e);
+            println!("ConfigureWindow failed: {:?}", e);
         }
 
         Ok(())
