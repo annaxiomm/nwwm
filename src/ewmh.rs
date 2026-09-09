@@ -68,6 +68,7 @@ impl Ewmh {
                 self.atoms.net_wm_name,
                 self.atoms.net_client_list,
                 self.atoms.net_active_window,
+                self.atoms.net_number_of_desktops,
             ],
         });
     }
@@ -90,6 +91,16 @@ impl Ewmh {
             property: self.atoms.net_active_window,
             r#type: xcb::x::ATOM_WINDOW,
             data: &[active],
+        });
+    }
+
+    pub fn update_number_of_desktops(&self, conn: &xcb::Connection, number_desktops: u32) {
+        conn.send_request(&xcb::x::ChangeProperty {
+            mode: xcb::x::PropMode::Replace,
+            window: self.root,
+            property: self.atoms.net_number_of_desktops,
+            r#type: xcb::x::ATOM_CARDINAL,
+            data: &[number_desktops],
         });
     }
 }

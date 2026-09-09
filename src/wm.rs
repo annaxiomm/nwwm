@@ -181,6 +181,9 @@ impl WindowManager {
         });
         self.conn.flush().unwrap();
 
+        self.ewmh
+            .update_number_of_desktops(&self.conn, self.num_workspaces as u32);
+
         loop {
             match self.conn.wait_for_event() {
                 Ok(event) => match event {
