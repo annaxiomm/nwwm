@@ -9,6 +9,7 @@ pub enum Action {
     CloseWindow,
     SetLayout(Layout),
     Exec(String),
+    SwitchWorkspace(usize),
 
     Quit,
 }
@@ -72,6 +73,7 @@ impl WindowManager {
         match action {
             Action::FocusNext => self.focus_next()?,
             Action::SetLayout(layout) => self.set_layout(layout)?,
+            Action::SwitchWorkspace(id) => self.switch_workspace(id)?,
             Action::CloseWindow => {
                 if let Some(win) = self.focused {
                     self.close_window(win)?;
@@ -97,6 +99,34 @@ impl WindowManager {
         Ok(())
     }
 
+    pub fn switch_workspace(&mut self, workspace_id: usize) -> Result<(), NwwmError> {
+        if workspace_id > self.num_workspaces || workspace_id == 0 {
+            self.logger.log(
+                format!("workspace index \"{}\" out of bounds", workspace_id).as_str(),
+                LogLevel::Error,
+            );
+            return Ok(());
+        }
+
+        if workspace_id == self.current_workspace + 1 {
+            return Ok(());
+        }
+
+        self.unmap_workspace(self.current_workspace);
+        self.current_workspace = workspace_id - 1;
+        self.map_workspace(self.current_workspace);
+
+        if !self.workspaces[self.current_workspace].windows.is_empty() {
+            self.focus_window(self.workspaces[self.current_workspace].windows[0].id)?;
+        } else {
+            self.unfocus();
+        }
+
+        self.tile()?;
+
+        Ok(())
+    }
+
     pub fn exec_command(&self, command: String) -> Result<(), NwwmError> {
         let mut parts = command.split_whitespace();
         let Some(program) = parts.next() else {
@@ -111,5 +141,28 @@ impl WindowManager {
             .spawn()
             .map_err(|_| NwwmError::SpawnCommandError)?;
         Ok(())
+    }
+
+    fn unmap_workspace(&self, id: usize) {
+        let workspace = &self.workspaces[id];
+        workspace
+            .windows
+            .iter()
+            .for_each(|w| self.unmap_window(w.id));
+    }
+
+    fn map_workspace(&self, id: usize) {
+        let workspace = &self.workspaces[id];
+        workspace.windows.iter().for_each(|w| self.map_window(w.id));
+    }
+
+    fn unmap_window(&self, window: xcb::x::Window) {
+        let cookie = self
+            .conn
+            .send_request_checked(&xcb::x::UnmapWindow { window });
+
+        if let Err(e) = self.conn.check_request(cookie) {
+            println!("UnmapWindow failed: {e}");
+        }
     }
 }

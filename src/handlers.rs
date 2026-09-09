@@ -179,8 +179,13 @@ impl WindowManager {
         }
     }
 
-    fn map_window(&self, window: xcb::x::Window) {
-        self.conn.send_request(&xcb::x::MapWindow { window });
+    pub fn map_window(&self, window: xcb::x::Window) {
+        let cookie = self
+            .conn
+            .send_request_checked(&xcb::x::MapWindow { window });
+        if let Err(e) = self.conn.check_request(cookie) {
+            println!("MapWindow failed: {e}");
+        }
     }
 
     fn destroy_managed_window(&mut self, window: xcb::x::Window) -> Result<(), NwwmError> {

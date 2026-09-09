@@ -55,6 +55,7 @@ pub struct Dock {
     pub strut: Strut,
 }
 
+#[derive(Clone)]
 pub struct Workspace {
     pub windows: Vec<Window>,
     pub layout: Layout,
@@ -63,6 +64,7 @@ pub struct Workspace {
 pub struct WindowManager {
     pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
     pub workspaces: Vec<Workspace>, // same here
+    pub num_workspaces: usize,
     pub clients: Vec<Window>,
     pub docks: Vec<Dock>,
     pub ewmh: Ewmh,
@@ -111,10 +113,16 @@ impl WindowManager {
         logger.log("initialisting config...", LogLevel::Debug);
         let config = Config::new(&conn, screen);
 
-        let workspaces: Vec<Workspace> = vec![Workspace {
-            windows: Vec::new(),
-            layout: Layout::MasterStack,
-        }];
+        let num_workspaces: usize = 5;
+
+        let workspaces: Vec<Workspace> = vec![
+            Workspace {
+                windows: Vec::new(),
+                layout: Layout::MasterStack,
+            };
+            5
+        ];
+
         let clients: Vec<Window> = Vec::new();
         let docks: Vec<Dock> = Vec::new();
 
@@ -142,6 +150,7 @@ impl WindowManager {
         Ok(Self {
             conn,
             workspaces,
+            num_workspaces,
             clients,
             docks,
             ewmh,
@@ -270,6 +279,17 @@ impl WindowManager {
         self.conn.flush().unwrap();
 
         Ok(())
+    }
+
+    pub fn unfocus(&mut self) {
+        if let Some(old) = self.focused {
+            self.conn.send_request(&xcb::x::ChangeWindowAttributes {
+                window: old,
+                value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
+            });
+        }
+
+        self.focused = None;
     }
 
     pub fn focus_next(&mut self) -> Result<(), NwwmError> {

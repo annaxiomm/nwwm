@@ -60,6 +60,31 @@ impl Config {
             },
             Keybind {
                 modifiers: mod_key,
+                keysym: xkb::keysyms::KEY_1,
+                action: Action::SwitchWorkspace(1),
+            },
+            Keybind {
+                modifiers: mod_key,
+                keysym: xkb::keysyms::KEY_2,
+                action: Action::SwitchWorkspace(2),
+            },
+            Keybind {
+                modifiers: mod_key,
+                keysym: xkb::keysyms::KEY_3,
+                action: Action::SwitchWorkspace(3),
+            },
+            Keybind {
+                modifiers: mod_key,
+                keysym: xkb::keysyms::KEY_4,
+                action: Action::SwitchWorkspace(4),
+            },
+            Keybind {
+                modifiers: mod_key,
+                keysym: xkb::keysyms::KEY_5,
+                action: Action::SwitchWorkspace(5),
+            },
+            Keybind {
+                modifiers: mod_key,
                 keysym: xkb::keysyms::KEY_r,
                 action: Action::Exec("rofi -show run".to_string()),
             },
