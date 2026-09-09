@@ -11,6 +11,7 @@ pub struct Config {
     pub border_unfocused: u32,
     pub mod_key: xcb::x::ModMask,
     pub keybinds: Vec<Keybind>,
+    pub startup: Vec<String>,
 }
 
 fn alloc_color(
@@ -104,12 +105,17 @@ impl Config {
                 action: Action::Exec("test-unavailable-command".to_string()), // test keybind to test trying to open non-existent programs
             },
         ];
+        let startup: Vec<String> = vec![
+            "feh --bg-fill ~/Pictures/Wallpapers/blahaj.png".to_string(),
+            "polybar".to_string(),
+        ];
         Self {
             border_width,
             border_focused,
             border_unfocused,
             mod_key,
             keybinds,
+            startup,
         }
     }
 }

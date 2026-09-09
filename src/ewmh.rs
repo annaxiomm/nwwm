@@ -69,6 +69,7 @@ impl Ewmh {
                 self.atoms.net_client_list,
                 self.atoms.net_active_window,
                 self.atoms.net_number_of_desktops,
+                self.atoms.net_current_desktop,
             ],
         });
     }

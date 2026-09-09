@@ -81,7 +81,7 @@ impl WindowManager {
             }
             Action::Exec(command) => {
                 let command_cloned = command.clone();
-                if self.exec_command(command).is_err() {
+                if self.exec_command(command.as_str()).is_err() {
                     self.logger.log(
                         format!(
                             "failed to spawn command \"{}\"",
@@ -130,17 +130,10 @@ impl WindowManager {
         Ok(())
     }
 
-    pub fn exec_command(&self, command: String) -> Result<(), NwwmError> {
-        let mut parts = command.split_whitespace();
-        let Some(program) = parts.next() else {
-            return Ok(());
-        };
-
-        Command::new(program)
-            .args(parts)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
+    pub fn exec_command(&self, command: &str) -> Result<(), NwwmError> {
+        Command::new("sh")
+            .arg("-c")
+            .arg(command)
             .spawn()
             .map_err(|_| NwwmError::SpawnCommandError)?;
         Ok(())

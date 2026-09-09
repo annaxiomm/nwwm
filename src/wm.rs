@@ -184,6 +184,8 @@ impl WindowManager {
         self.ewmh
             .update_number_of_desktops(&self.conn, self.num_workspaces as u32);
 
+        self.run_startup_cmds();
+
         loop {
             match self.conn.wait_for_event() {
                 Ok(event) => match event {
@@ -416,5 +418,16 @@ impl WindowManager {
             .iter()
             .flat_map(|ws| ws.windows.iter())
             .find(|w| w.id == id)
+    }
+
+    fn run_startup_cmds(&self) -> Result<(), NwwmError> {
+        self.logger
+            .log("running startup commands...", LogLevel::Debug);
+        for cmd in &self.config.startup {
+            self.logger.log(cmd.as_str(), LogLevel::Debug);
+            self.exec_command(cmd)?;
+        }
+
+        Ok(())
     }
 }
