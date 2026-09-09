@@ -24,8 +24,8 @@ pub fn monocle(
         layoutmap.insert(
             window,
             Rect {
-                x: 0 + screen.x,
-                y: 0 + screen.y,
+                x: screen.x,
+                y: screen.y,
                 width: window_width,
                 height: window_height,
             },
@@ -100,8 +100,8 @@ pub fn master_stack(
         layoutmap.insert(
             windows[0],
             Rect {
-                x: 0 + screen.x,
-                y: 0 + screen.y,
+                x: screen.x,
+                y: screen.y,
                 width: screen_width - (2 * config.border_width),
                 height: screen_height - (2 * config.border_width),
             },
@@ -117,8 +117,8 @@ pub fn master_stack(
     layoutmap.insert(
         windows[0],
         Rect {
-            x: 0 + screen.x,
-            y: 0 + screen.y,
+            x: screen.x,
+            y: screen.y,
             width: master_width - (2 * config.border_width),
             height: screen_height - (2 * config.border_width),
         },
