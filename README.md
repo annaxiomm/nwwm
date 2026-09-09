@@ -22,6 +22,10 @@
 - [x] cool cosmetic stuff
   - [x] window borders
   - [ ] vanity gaps
+- [x] multiple desktops
+  - [x] switching?
+  - [ ] moving windows?
+  - [x] bar compatibility?
 - [x] ewmh compilance (extremely limited)
 - [ ] more stuff coming soon!
 
@@ -31,9 +35,9 @@
 - xorg-server and xorg-xinit
 - Xephyr
 
-I severely recommend that you DO NOT install nwwm as it is. it's 100% unusable and you will be stuck with a black screen (or whatever your wallpaper is).
+You should not install nwwm as your main window manager. It is experimental software and lacks many basic features you would expect from a window manager. **You have been warned.**
 
-to test it, make sure you aren't using display 2 for anything then run `./test.sh &`. this will launch a Xephyr instance with nwwm running, and it will also launch kitty within nwwm (which you can then use to open other apps).
+To test nwwm, make sure you aren't using display 2 for anything then run `./test.sh &`. This will launch a Xephyr instance with nwwm running. Then, click on the window, press `Ctrl+Shift` to let Xephyr grab your keyboard, then go ham!
 
 If you want to make changes to the test script feel free, but **for the love of god do not commit them**
 
