@@ -111,7 +111,7 @@ impl WindowManager {
         ewmh.setup(&conn);
 
         logger.log("initialisting config...", LogLevel::Debug);
-        let config = Config::new(&conn, screen);
+        let config = Config::new(&conn, screen, &logger);
 
         let num_workspaces: usize = 5;
 

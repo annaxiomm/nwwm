@@ -249,7 +249,7 @@ impl WindowManager {
         // dock windows shouldn't get borders
         self.conn.send_request(&xcb::x::ConfigureWindow {
             window,
-            value_list: &[xcb::x::ConfigWindow::BorderWidth(2)],
+            value_list: &[xcb::x::ConfigWindow::BorderWidth(self.config.border_width)],
         });
 
         self.conn.send_request(&xcb::x::ChangeWindowAttributes {

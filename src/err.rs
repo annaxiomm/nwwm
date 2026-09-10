@@ -9,6 +9,7 @@ pub enum NwwmError {
     MapError,
     XKBError,
     SpawnCommandError,
+    HexFormatError,
 }
 
 impl fmt::Display for NwwmError {
@@ -39,6 +40,12 @@ impl fmt::Display for NwwmError {
                 write!(
                     f,
                     "[nwwm] error: could not spawn command (this shouldn't be fatal - open an issue on GitHub)"
+                )
+            }
+            NwwmError::HexFormatError => {
+                write!(
+                    f,
+                    "[nwwm] error: colours should be in #RRGGBB format (this shouldn't be fatal - open an issue on GitHub"
                 )
             }
         }

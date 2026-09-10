@@ -1,0 +1,11 @@
+# width of the border around windows, in px
+border_width = 2
+
+# colour of the border of focused windows, in hex
+border_focused = "ff0000" # red
+
+# colour of the border of unfocused windows, in hex
+border_unfocused = "ffffff" # white
+
+# the mod key to be used
+mod_key = "Mod4"
