@@ -10,6 +10,9 @@ pub enum NwwmError {
     XKBError,
     SpawnCommandError,
     HexFormatError,
+    KeyBindError,
+    ModError,
+    ParseActionError,
 }
 
 impl fmt::Display for NwwmError {
@@ -46,6 +49,24 @@ impl fmt::Display for NwwmError {
                 write!(
                     f,
                     "[nwwm] error: colours should be in #RRGGBB format (this shouldn't be fatal - open an issue on GitHub"
+                )
+            }
+            NwwmError::KeyBindError => {
+                write!(
+                    f,
+                    "[nwwm] error: invalid keybind (this shouldn't be fatal - open an issue on GitHub"
+                )
+            }
+            NwwmError::ModError => {
+                write!(
+                    f,
+                    "[nwwm] error: invalid modifier in keybind (this shouldn't be fatal - open an issue on GitHub"
+                )
+            }
+            NwwmError::ParseActionError => {
+                write!(
+                    f,
+                    "[nwwm] error: failed to parse action (this shouldn't be fatal - open an issue on GitHub"
                 )
             }
         }

@@ -184,7 +184,7 @@ impl WindowManager {
         self.ewmh
             .update_number_of_desktops(&self.conn, self.num_workspaces as u32);
 
-        self.run_startup_cmds();
+        self.run_startup_cmds()?;
 
         loop {
             match self.conn.wait_for_event() {

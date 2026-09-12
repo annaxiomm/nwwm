@@ -18,7 +18,8 @@
   - [ ] dwindle
 - [x] keybinds
   - [x] modular?
-  - [ ] customisable?
+  - [x] customisable?
+- [x] runtime config loading
 - [x] cool cosmetic stuff
   - [x] window borders
   - [ ] vanity gaps
