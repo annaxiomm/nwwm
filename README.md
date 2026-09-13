@@ -67,8 +67,6 @@ nwwm can be configured using the following options:
 ### Keybindings
 Keybindings in nwwm are configured using the following syntax:
 ```toml
-```
-```toml
 keybinds = {
   "modifiers+key" = "action"
 }
