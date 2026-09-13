@@ -1,6 +1,6 @@
 <div align="center">
 <h1>nwwm</h1>
-<p>an experimental window manager for x11</p>
+<p>an experimental window manager for x11, written in rust</p>
 <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/annaxiomm/nwwm/rust.yml">
 <img alt="GitHub License" src="https://img.shields.io/github/license/annaxiomm/nwwm" />
 <br/>
@@ -10,50 +10,64 @@
 
 ![a screenshot of nwwm](./screenshot.png)
 
+> [!WARNING]
+> nwwm is a learning project and isn't intended to be a production-ready window manager. use at your own risk.
+
 ## Features
-- [x] multiple tiling modes
-  - [x] columns
-  - [x] monocle
-  - [x] master/stack
-  - [ ] dwindle
-- [x] keybinds
-  - [x] modular?
-  - [x] customisable?
-- [x] runtime config loading
-- [x] cool cosmetic stuff
-  - [x] window borders
-  - [ ] vanity gaps
-- [x] multiple desktops
-  - [x] switching?
-  - [ ] moving windows?
-  - [x] bar compatibility?
-- [x] ewmh compilance (extremely limited)
-- [ ] more stuff coming soon!
+- dynamic tiling
+- TOML configuration
+- workspaces
+- dock awareness
+- EWMH support
+- X11 native
 
-## Installation / testing
-**you will need:**
-- rust & cargo
-- xorg-server and xorg-xinit
+## Why build a window manager in {year}?
+**Because I can.** nwwm isn't meant to be a production ready, top of the line, solves all your problems window manager. I built nwwm because I wanted to learn how this kind of stuff works.
+
+## Building
+
+> nwwm is an experimental project and isn't currently available through the AUR or other package managers.
+
+### You will need:
+- Linux
+- Rust and Cargo
+- X11
 - Xephyr
+- Some form of git
 
-You should not install nwwm as your main window manager. It is experimental software and lacks many basic features you would expect from a window manager. **You have been warned.**
+### Installation and running
+This guide walks you through running nwwm inside of Xephyr, a nested X server that runs as a window inside of your existing session. This **WILL NOT** replace your current window manager.
+1. Clone the repository using your method of choice
+  1. **With Git**: `git clone https://github.com/annaxiomm/nwwm`
+  2. With Github CLI: `gh repo clone annaxiomm/nwwm`
+2. Enter the directory with `cd nwwm`
+3. Run the `./test.sh` script. This will open a Xephyr window with nwwm running
+4. Focus the Xephyr window and press `ctrl+shift` on your keyboard to give nwwm keyboard focus
+5. Go ham!
 
-To test nwwm, make sure you aren't using display 2 for anything then run `./test.sh &`. This will launch a Xephyr instance with nwwm running. Then, click on the window, press `Ctrl+Shift` to let Xephyr grab your keyboard, then go ham!
+## Configuration
+nwwm is configured via a TOML config file. This is, by default, located at `~/.config/nwwm/config.toml` (or wherever your config directory is). If no configuration file is present, nwwm will attempt to create one using its defaults.
 
-If you want to make changes to the test script feel free, but **for the love of god do not commit them**
+### Options
+nwwm can be configured using the following options:
+| Option | Description | Default |
+| ------------- | -------------- | -------------- |
+| `border_focused` | the colour of a window's border when focused  | `#ffa500` |
+| `border_unfocused` | the colour of a window's border when unfocused | `#ffffff` |
+| `border_width` | the width of a window's border in pixels | `2` |
+| `mod_key` | the modifier key to be used in keybindings | `Mod4` (Windows / Command key) |
 
-## EWMH Checklist
-### WM
-- [x] _NET_WM_NAME
-- [x] _NET_SUPPORTING_WM_CHECK
-- [x] _NET_SUPPORTED
-- [x] _NET_CLIENT_LIST
-### Desktops
-- [x] _NET_NUMBER_OF_DESKTOPS
-- [ ] _NET_DESKTOP_GEOMETRY
-- [ ] _NET_DESKTOP_VIEWPORT
-- [x] _NET_CURRENT_DESKTOP
-- [ ] _NET_DESKTOP_NAMES
-### etc
-- [ ] _NET_ACTIVE_WINDOW
-- [ ] _NET_WORKAREA
+`mod_key` can be set to the following values:
+- `Mod1` - alt
+- `Mod2` - number lock
+- `Mod3` - nothing (don't use this one)
+- `Mod4` - meta key (windows / command depending on the keyboard)
+- `Mod5` - alt gr
+```
+
+### Keybindings
+
+Keybindings in nwwm are configured using the following syntax:
+
+
+
