@@ -11,7 +11,7 @@
 ![a screenshot of nwwm](./screenshot.png)
 
 > [!WARNING]
-> nwwm is a learning project and isn't intended to be a production-ready window manager. use at your own risk.
+> nwwm is a learning project and isn't intended to be a production-ready window manager. use at your own risk!
 
 ## Features
 - dynamic tiling
@@ -63,11 +63,81 @@ nwwm can be configured using the following options:
 - `Mod3` - nothing (don't use this one)
 - `Mod4` - meta key (windows / command depending on the keyboard)
 - `Mod5` - alt gr
-```
 
 ### Keybindings
-
 Keybindings in nwwm are configured using the following syntax:
+```toml
+```
+```toml
+keybinds = {
+  "modifiers+key" = "action"
+}
+```
+for example: 
 
+```toml
+"mod+return" = "exec kitty",
+"mod+shift+q" = "quit"
+```
 
+#### Modifiers
+- `mod` - whatever is set as `mod_key`
+- `shift`
+- `alt`
+- `ctrl` - control
 
+#### Actions
+| Action | Description | Values |
+| ------------- | -------------- | -------------- |
+| `exec <command>` | runs `<command>` | `<command>` can be any string that represents a valid shell command on your system (e.g. `kitty`, `rofi -show run`) |
+| `closewindow` | closes the currently focused window | |
+| `setworkspace <workspace>` | sets the current workspace to `<workspace>` | `<workspace>` can be any positive integer (whole number) greater than 0 |
+| `focus <direction>` | moves window focus | `<direction>` can either be `next` or `last` |
+| `quit` | quits nwwm | |
+
+a full example config can be found at [config/default.toml](config/default.toml)
+
+## What I learned
+- X11 is an ancient beast
+- (good) Error handling is actually a lot harder than I thought
+- code that runs != good code
+- I'm actually really bad at rust
+- How to structure a low-level project properly
+- Knowing my limits
+- Defining a clear end point and working towards it
+
+## Known limitations
+nwwm is a small experimental project and isn't meant to replace any existing window managers. Rather, it was created to help me become a better programmer and learn my faults before I try to work on something actually important.
+
+- **X11 only** - nwwm is built on XCB and does not support Wayland.
+- **Limited EWMH support** - nwwm only implements a small subset of the EWMH (Extended Window Manager Hints) specification and as such some applications may behave unexpectedly
+- **Dock support is basic** - nwwm understands docks and their reserved screen space but this hasn't been extensively tested
+- **No persistent state** - nwwm currently does not recognise previously opened windows, does not save state between sessions, and unexpected termination of nwwm may lead to data loss. 
+- 
+- **Tiling** - ratios cannot be changed, and tiling is done algorithmically on a Vector of windows so more advanced layouts like BSP cannot be easily implemented
+- **Error handling** - nwwm's error handling is very naive and many errors may go unnoticed or cause nwwm to quit without warning instead of attempting to recover
+- **Instability** - nwwm is experimental software and is as such very unstable
+- **Limited configurability** - nwwm's configuration is intentionally minimal and doesn't expose every aspect of the window manager
+- **No multi-monitor support** - nwwm treats the entire X11 screen as a single monitor and does not support splitting workspaces across monitors
+- **Testing is limited** - nwwm has been primarily tested within Xephyr on my own X11 setup
+
+These limitations are intentional to some extent - nwwm was developed to help me learn about X11, Linux desktop interactions, and writing low level software rather than to compete with existing window managers.
+
+## Future ideas
+In the future, I will develop a successor to nwwm using what I've learned to make an actually viable and useful window manager, preferably implementing some of the following ideas:
+
+- Lua scripting for configuration
+- Multi-monitor Xinerama support
+- Actually half decent error handling that attempts to recover and tells you what went wrong
+- More advanced tiling, like BSP or full floating
+- Built in dock and cursor
+- Hot config reloading
+- Potentially compositing behaviour, such as animations or transparency
+- Full EWMH compatibility
+- Most importantly, daily driver potential
+
+## Credits
+Finally, a list of people who helped me throughout the development process
+
+- [Cooki](https://github.com/cooki-studios) for his continued reassurance that nwwm is, indeed, tuff
+- [Hack Club](https://hackclub.com) for encouraging me to start this project
