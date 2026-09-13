@@ -111,7 +111,6 @@ nwwm is a small experimental project and isn't meant to replace any existing win
 - **Limited EWMH support** - nwwm only implements a small subset of the EWMH (Extended Window Manager Hints) specification and as such some applications may behave unexpectedly
 - **Dock support is basic** - nwwm understands docks and their reserved screen space but this hasn't been extensively tested
 - **No persistent state** - nwwm currently does not recognise previously opened windows, does not save state between sessions, and unexpected termination of nwwm may lead to data loss. 
-- 
 - **Tiling** - ratios cannot be changed, and tiling is done algorithmically on a Vector of windows so more advanced layouts like BSP cannot be easily implemented
 - **Error handling** - nwwm's error handling is very naive and many errors may go unnoticed or cause nwwm to quit without warning instead of attempting to recover
 - **Instability** - nwwm is experimental software and is as such very unstable
