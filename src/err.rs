@@ -1,3 +1,8 @@
+// ERR.rs
+// ------
+// extremely naïve error handling that should be fixed if
+// this ever wants to go into prod
+
 use std::fmt;
 
 #[derive(Debug)]

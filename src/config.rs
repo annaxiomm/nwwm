@@ -1,3 +1,8 @@
+// CONFIG.rs
+// ---------
+// all things config, config loading, and config parsing
+// should be split into separate files
+
 use serde::Deserialize;
 use std::{collections::HashMap, fs, io::Write};
 use xcb::x::{Keysym, ModMask};
@@ -10,6 +15,7 @@ use crate::{
 };
 use xkbcommon::xkb;
 
+// the actual config that nwwm reads from
 #[allow(dead_code)]
 pub struct Config {
     pub border_width: u32,
@@ -20,6 +26,8 @@ pub struct Config {
     pub startup: Vec<String>,
 }
 
+// config parsed directly from TOML which can then
+// be re-parsed into actual values useful to nwwm
 #[derive(Deserialize, Debug)]
 pub struct FileConfig {
     border_width: u32,
@@ -30,6 +38,9 @@ pub struct FileConfig {
     startup: Vec<String>,
 }
 
+// helper function to allocate colours for X11 - X11 doesn't
+// allow you to use arbitrary colours but rather requires
+// colours to be pre-allocated and referenced with a u32 id
 fn alloc_color(
     conn: &xcb::Connection,
     screen: &xcb::x::Screen,
@@ -63,6 +74,9 @@ fn parse_color(color: &str) -> Result<(u16, u16, u16), NwwmError> {
     let g = u8::from_str_radix(&hex[2..4], 16).map_err(|_| NwwmError::HexFormatError)?;
     let b = u8::from_str_radix(&hex[4..6], 16).map_err(|_| NwwmError::HexFormatError)?;
 
+    // X11 uses 48 bit colour values (#ffff00000000) instead of
+    // traditional 24 bit (#ff0000) so conversion is done here by
+    // multiplying by 257
     Ok((r as u16 * 0x0101, g as u16 * 0x0101, b as u16 * 0x0101))
 }
 
@@ -115,7 +129,7 @@ fn parse_key(mod_key: ModMask, key_string: String) -> Result<(ModMask, u32), Nww
         }
     }
 
-    let keysym = xkb::keysym_from_name(key, xkb::KEYSYM_CASE_INSENSITIVE).raw();
+    let keysym = xkb::keysym_from_name(key, xkb::KEYSYM_CASE_INSENSITIVE).raw(); // KEYSYM_CASE_INSENSITIVE means that
     if keysym == xkb::keysyms::KEY_NoSymbol {
         // keysym_from_name returns KEY_NoSymbol if the key is invalid
         return Err(NwwmError::KeyBindError);
@@ -126,8 +140,9 @@ fn parse_key(mod_key: ModMask, key_string: String) -> Result<(ModMask, u32), Nww
 
 fn parse_action(action_string: String) -> Result<Action, NwwmError> {
     let action_split = match action_string.split_once(" ") {
-        Some((action_name, params)) => vec![action_name, params.trim()],
-        None => vec![action_string.as_str()],
+        // split the command into an action and parameters
+        Some((action_name, params)) => vec![action_name, params.trim()], // if the action has parameters (e.g. SetWorkspace)
+        None => vec![action_string.as_str()], // if it's just a standalone action (e.g. Quit)
     };
     let action = match action_split[0] {
         "quit" => Action::Quit,
@@ -168,6 +183,9 @@ fn parse_action(action_string: String) -> Result<Action, NwwmError> {
     Ok(action)
 }
 
+// helper function that converts a string to
+// a hex colour and then allocates that as an
+// X11 colour
 fn alloc_color_from_hex(
     logger: &Logger,
     conn: &xcb::Connection,
@@ -180,6 +198,8 @@ fn alloc_color_from_hex(
             format!("unable to parse colour \"{}\"colours should be in #RRGGBB format. defaulting to black", hex).as_str(),
             LogLevel::Error,
         );
+
+        // if something goes wrong just use black
         return alloc_color(conn, screen, 0x0000, 0x0000, 0x0000);
     }
 
@@ -189,12 +209,14 @@ fn alloc_color_from_hex(
 }
 
 fn load_config(logger: &Logger) -> Option<FileConfig> {
+    // default config file - included at compile time
     let default_config = include_str!("../config/default.toml");
 
     let config_dir = dirs::config_dir()
         .expect("Could not find config dir!")
         .join("nwwm");
 
+    // if the config dir doesn't exist, try to create one
     if fs::create_dir_all(&config_dir).is_err() {
         logger.log("failed to create config directory", LogLevel::Error);
         return None;
@@ -230,18 +252,20 @@ impl Config {
     pub fn new(conn: &xcb::Connection, screen: &xcb::x::Screen, logger: &Logger) -> Self {
         let config_file = load_config(logger).unwrap();
 
+        // values from the config
         let border_width = config_file.border_width;
 
         let border_focused =
             alloc_color_from_hex(logger, conn, screen, config_file.border_focused.as_str());
         let border_unfocused =
             alloc_color_from_hex(logger, conn, screen, config_file.border_unfocused.as_str());
+
         let mod_key = match config_file.mod_key.as_str() {
-            "Mod1" => xcb::x::ModMask::N1,
-            "Mod2" => xcb::x::ModMask::N2,
-            "Mod3" => xcb::x::ModMask::N3,
-            "Mod4" => xcb::x::ModMask::N4,
-            "Mod5" => xcb::x::ModMask::N5,
+            "Mod1" => xcb::x::ModMask::N1, // alt
+            "Mod2" => xcb::x::ModMask::N2, // num lock
+            "Mod3" => xcb::x::ModMask::N3, // undefined
+            "Mod4" => xcb::x::ModMask::N4, // meta (windows / command)
+            "Mod5" => xcb::x::ModMask::N5, // some obscure key idk
             _ => {
                 logger.log("invalid \"mod_key\" in config, using Mod4", LogLevel::Error);
                 xcb::x::ModMask::N4
@@ -257,6 +281,10 @@ impl Config {
                     LogLevel::Error,
                 );
 
+                // minimal keybind set literally only lets you quit
+                // once reloading keybinds is added it will go here as well
+                // TODO: show a small banner letting the user know that something went
+                // wrong in keybind parsing
                 vec![Keybind {
                     modifiers: mod_key | xcb::x::ModMask::SHIFT,
                     keysym: xkb::keysyms::KEY_q,

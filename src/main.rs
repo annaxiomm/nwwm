@@ -1,3 +1,11 @@
+// MAIN.rs
+// -------
+// main entry point
+//
+// WARNING: this project is a learning exercise
+// and is full of janky, non prod-ready code.
+// Enter, hack on, and use at your own risk.
+
 use crate::{err::NwwmError, logger::LogLevel};
 
 mod atoms;

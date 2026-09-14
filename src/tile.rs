@@ -1,3 +1,7 @@
+// TILE.rs
+// -------
+// tiling logic
+
 use crate::{config::Config, err::NwwmError, wm::Rect};
 use std::collections::HashMap;
 
@@ -9,6 +13,9 @@ pub enum Layout {
     MasterStack,
 }
 
+// every window takes up 100% of the screen,
+// and the currently focused window is brought
+// to the top
 pub fn monocle(
     screen: &Rect,
     windows: Vec<xcb::x::Window>,
@@ -35,6 +42,7 @@ pub fn monocle(
     Ok(layoutmap)
 }
 
+// columns can probably be removed, it's 100% obsolete
 pub fn columns(
     screen: &Rect,
     windows: Vec<xcb::x::Window>,
@@ -59,8 +67,6 @@ pub fn columns(
         } else {
             slot_width
         };
-
-        // subtract borders here
         let client_width = width - 2 * border_width;
 
         layoutmap.insert(
@@ -79,6 +85,9 @@ pub fn columns(
     Ok(layoutmap)
 }
 
+// 1 window is the master which takes up half the screen
+// the rest form a "stack" and tile vertically on the
+// other half
 pub fn master_stack(
     screen: &Rect,
     windows: Vec<xcb::x::Window>,

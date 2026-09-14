@@ -1,3 +1,8 @@
+// LOGGER.rs
+// ---------
+// logging n' stuff
+// TODO - log to a file
+
 use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct Logger {
@@ -7,7 +12,7 @@ pub struct Logger {
 
 #[allow(dead_code)]
 pub enum LogLevel {
-    Debug,
+    Debug, // Debug logs only show up if verbose mode is enabled
     Info,
     Warn,
     Error,

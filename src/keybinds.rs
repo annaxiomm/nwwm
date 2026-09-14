@@ -1,3 +1,8 @@
+// KEYBINDS.rs
+// -----------
+// logic pertaining to keybinds and actions
+// TODO: move actions into a separated file
+
 use xkbcommon::xkb;
 
 use crate::{err::NwwmError, logger::LogLevel, tile::Layout, wm::WindowManager};
@@ -16,11 +21,12 @@ pub enum Action {
 
 pub struct Keybind {
     pub modifiers: xcb::x::ModMask,
-    pub keysym: u32,
+    pub keysym: u32, // aka the key
     pub action: Action,
 }
 
 impl Keybind {
+    // checks if the keybind matches an event
     pub fn matches(&self, xkb_state: &xkb::State, ev: &xcb::x::KeyPressEvent) -> bool {
         let state = xcb::x::ModMask::from_bits_truncate(ev.state().bits());
 
@@ -59,6 +65,7 @@ impl WindowManager {
                     keyboard_mode: xcb::x::GrabMode::Async,
                 });
 
+                // not sure why this doesn't use logger
                 match self.conn.check_request(cookie) {
                     Ok(_) => {}
                     Err(e) => eprintln!("[nwwm] error: {:?}", e),
@@ -100,6 +107,11 @@ impl WindowManager {
     }
 
     pub fn switch_workspace(&mut self, workspace_id: usize) -> Result<(), NwwmError> {
+        // workspace_id and self.current_workspace are offset by 1 -
+        // workspace_id starts at 1 and self.current_workspace starts at 0.
+        //
+        // this is because workspace_id is human readable, and self.current_workspace
+        // is a vector index.
         if workspace_id > self.num_workspaces || workspace_id == 0 {
             self.logger.log(
                 format!("workspace index \"{}\" out of bounds", workspace_id).as_str(),
@@ -108,14 +120,17 @@ impl WindowManager {
             return Ok(());
         }
 
+        // if you try to switch to the current workspace, reject
         if workspace_id == self.current_workspace + 1 {
             return Ok(());
         }
 
-        self.unmap_workspace(self.current_workspace);
-        self.current_workspace = workspace_id - 1;
-        self.map_workspace(self.current_workspace);
+        self.unmap_workspace(self.current_workspace); // ^
+        self.current_workspace = workspace_id - 1; // | switch these calls around to get rid of screen flicker
+        self.map_workspace(self.current_workspace); // V
 
+        // focus the first window in the workspace
+        // TODO: make workspaces remember which windows are focused
         if !self.workspaces[self.current_workspace].windows.is_empty() {
             self.focus_window(self.workspaces[self.current_workspace].windows[0].id)?;
         } else {
@@ -131,6 +146,7 @@ impl WindowManager {
     }
 
     pub fn exec_command(&self, command: &str) -> Result<(), NwwmError> {
+        // todo: redirect logging away from nwwm's STDOUT
         Command::new("sh")
             .arg("-c")
             .arg(command)
@@ -152,6 +168,8 @@ impl WindowManager {
         workspace.windows.iter().for_each(|w| self.map_window(w.id));
     }
 
+    // why is this not in the same file as map_window?
+    // Window and its associated methods should be in their own file
     fn unmap_window(&self, window: xcb::x::Window) {
         let cookie = self
             .conn

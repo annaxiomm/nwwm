@@ -1,5 +1,10 @@
+// ATOMS.rs
+// --------
+// EWMH atom definition
+
 use xcb::x;
 
+// get an atom from its name
 pub fn intern_atom(conn: &xcb::Connection, name: &str) -> Result<x::Atom, xcb::Error> {
     let cookie = conn.send_request(&x::InternAtom {
         only_if_exists: false,
@@ -34,23 +39,26 @@ pub struct Atoms {
 impl Atoms {
     pub fn new(conn: &xcb::Connection) -> Result<Self, xcb::Error> {
         Ok(Self {
+            // meta
             net_supported: intern_atom(conn, "_NET_SUPPORTED")?,
             net_supporting_wm_check: intern_atom(conn, "_NET_SUPPORTING_WM_CHECK")?,
             net_wm_name: intern_atom(conn, "_NET_WM_NAME")?,
+            utf8_string: intern_atom(conn, "UTF8_STRING")?,
 
+            // window management
             net_client_list: intern_atom(conn, "_NET_CLIENT_LIST")?,
             net_active_window: intern_atom(conn, "_NET_ACTIVE_WINDOW")?,
             net_number_of_desktops: intern_atom(conn, "_NET_NUMBER_OF_DESKTOPS")?,
             net_current_desktop: intern_atom(conn, "_NET_CURRENT_DESKTOP")?,
 
+            // windows themselves
             net_wm_window_type: intern_atom(conn, "_NET_WM_WINDOW_TYPE")?,
             net_wm_window_type_dialog: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DIALOG")?,
             net_wm_window_type_dock: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DOCK")?,
             net_wm_window_type_utility: intern_atom(conn, "_NET_WM_WINDOW_TYPE_UTILITY")?,
 
+            // struts
             net_wm_strut_partial: intern_atom(conn, "_NET_WM_STRUT_PARTIAL")?,
-
-            utf8_string: intern_atom(conn, "UTF8_STRING")?,
         })
     }
 }

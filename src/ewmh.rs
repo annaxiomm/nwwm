@@ -1,3 +1,7 @@
+// EWMH.rs
+// -------
+// EWMH setter methods basically
+
 use crate::{atoms::Atoms, err::NwwmError, wm::Window};
 
 #[allow(dead_code)]
