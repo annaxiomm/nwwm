@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="main.css" rel="stylesheet" />
+	<link href="images/logo.png" rel="icon" type="image/png" />
+	<title>nwwm</title>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <div id="logo">
+                <img src="images/logo.png" id="logo-image" />
+                <div>
+                <h1 id="logo-title">nwwm</h1>
+                <span>an experimental window manager</span>
+                </div>
+            </div>
+            <div id="links">
+                <a href="/">Home</a>
+                <a href="docs/">Documentation</a>
+                <a href="https://github.com/annaxiomm/nwwm">GitHub</a>
+            </div>
+        </div>
+        <div id="content">
+            <img src="images/screenshot.png" id="screenshot" />
+            <a href="#what">What is it?</a> · <a href="#how">How do I get it?</a> · <a href="#demo">Demo</a> · <a href="#config">Configuring</a>
+            <div class="warning">
+                <div class="warning-title">⚠ WARNING</div>
+                <div id="warning-content">
+                    nwwm is experimental software created mainly as a learning project. it should <strong>not</strong> be relied on as daily software and is likely to break if you try to use it normally.
+                </div>
+            </div>
+            <h1 id="what">What is it?</h1>
+            <p>nwwm is an experimental tiling window manager for X11 written in Rust, using XCB. </p>
+            <ul>
+                <li>minimal config through <code>~/.config/nwwm/config.toml</code></li>
+                <li>monocle and master/stack tiling</li>
+                <li>support for multiple workspaces</li>
+                <li>click-to-focus</li>
+            </ul>
+            <h1 id="how">How do I get it?</h1>
+            <p>nwwm is experimental software, and as such:</p>
+            <ul>
+                <li>is not recommended for daily use, and</li>
+                <li>is not available on package managers.</li>
+            </ul>
+            <h2>Prerequisites</h2>
+            <ul>
+                <li>Linux (this project doesn't work on MacOS or Windows)</li>
+                <li>Rust and Cargo</li>
+                <ul>
+                    <li>If you don't have Rust, you can get it from <a href="https://rustup.sh">rustup.sh</a></li>
+                </ul>
+                <li>X11</li>
+                <li>Xephyr</li>
+                <li>Some form of Git (Git, GitHub CLI, or some form of Git client)</li>
+            </ul>
+            <h2>Installing / testing</h2>
+            <p>to use nwwm, you'll need to clone the repo, build the project, and test it in Xephyr</p>
+            <ol>
+                <li>Clone the repository using your method of choice:</li>
+                <ol>
+                    <li><strong>With Git:</strong> <code>git clone https://github.com/annaxiomm/nwwm</code></li>
+                    <li><strong>With GitHub CLI:</strong> <code>gh repo clone annaxiomm/nwwm</code></li>
+                    <li>Or any other way you choose, as long as you get the code</li>
+                </ol>
+                <li>Enter the directory with <code>nwwm</code></li>
+                <li>Run the <code>./test.sh</code> script. This will build the project and open a Xephyr window with nwwm running</li>
+                <li>Focus the Xephyr window and press <kbd>ctrl+shift</kbd> to give nwwm keyboard focus</li>
+                <li>Go ham!</li>
+            </ol>
+            <p>By default, nwwm will run <code>kitty</code> and <code>polybar</code> at startup. You will need to install these separately through your distro's package manager, or, alternately, run nwwm once, quit it, modify the config file to fit your preferences (see <a href="#config">Configuring</a>), and then relaunch nwwm</p>
+            <h1 id="demo">Demo</h1>
+            <p>This project is primarily designed for <a href="https://hackclub.com" target="_blank">Hack Club's</a> <em>Stardance</em> program. I am aware that most people will not be able to, or willing to test nwwm on their own machines so here I've provided a short demo video outlining nwwm's basic features and operation.</p>
+            <p>INSERT DEMO VIDEO HERE</p>
+            <h1 id="config">Configuring</h1>
+            <p>nwwm is configured via a TOML config file, which is by default located at <code>~/.config/nwwm/config.toml</code> or wherever your config directory is). If no configuration file is present, nwwm will attempt to create one using its defaults.</p>
+            <p>The default config file is provided below. For more in-depth configuration docs, see <a href="docs/">Documentation</a></p>
+            <!-- HTML generated using hilite.me --><div style="background: #28283e; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #6272A4"># width of the border around windows, in px</span>
+<span style="color: #F8F8F2">border_width </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #FFB86C">2</span>
+
+<span style="color: #6272A4"># colour of the border of focused windows, in hex</span>
+<span style="color: #F8F8F2">border_focused </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;ff0000&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># red</span>
+
+<span style="color: #6272A4"># colour of the border of unfocused windows, in hex</span>
+<span style="color: #F8F8F2">border_unfocused </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;ffffff&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># white</span>
+
+<span style="color: #6272A4"># the mod key to be used</span>
+<span style="color: #F8F8F2">mod_key </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;Mod4&quot;</span>
+
+<span style="color: #6272A4"># commands that will be executed at startup</span>
+<span style="color: #F8F8F2">startup </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> [</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;polybar&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;kitty&quot;</span>
+<span style="color: #F8F8F2">]</span>
+
+<span style="color: #6272A4"># keybinds</span>
+<span style="color: #6272A4"># format: &quot;modifiers+key&quot; = &quot;action parameters&quot;</span>
+<span style="color: #F8F8F2">keybinds </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> [</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+shift+q&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;quit&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+w&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;focus next&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+c&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;closewindow&quot;</span><span style="color: #F8F8F2">,</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+enter&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;exec kitty&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+r&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;exec rofi -show run&quot;</span><span style="color: #F8F8F2">,</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+1&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 1&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+2&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 2&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+3&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 3&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+4&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 4&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+5&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 5&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">]</span>
+</pre></div>
+
+
+        </div>
+        <div id="footer">
+            <p>made with ❤️ by <a href="https://github.com/annaxiomm">annaxiomm</a> in 2026 | <a href="https://github.com/annaxiomm/nwwm">GitHub</a></p>
+        </div>
+    </div>
+</body>
+</html>
