@@ -38,8 +38,8 @@
 ### Installation and running
 This guide walks you through running nwwm inside of Xephyr, a nested X server that runs as a window inside of your existing session. This **WILL NOT** replace your current window manager.
 1. Clone the repository using your method of choice
-  1. **With Git**: `git clone https://github.com/annaxiomm/nwwm`
-  2. With Github CLI: `gh repo clone annaxiomm/nwwm`
+    1. **With Git**: `git clone https://github.com/annaxiomm/nwwm`
+    2. With Github CLI: `gh repo clone annaxiomm/nwwm`
 2. Enter the directory with `cd nwwm`
 3. Run the `./test.sh` script. This will open a Xephyr window with nwwm running
 4. Focus the Xephyr window and press `ctrl+shift` on your keyboard to give nwwm keyboard focus
