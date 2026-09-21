@@ -24,6 +24,8 @@ pub struct Config {
     pub mod_key: xcb::x::ModMask,
     pub keybinds: Vec<Keybind>,
     pub startup: Vec<String>,
+    pub gaps_inner: u32,
+    pub gaps_outer: u32,
 }
 
 // config parsed directly from TOML which can then
@@ -31,6 +33,8 @@ pub struct Config {
 #[derive(Deserialize, Debug)]
 pub struct FileConfig {
     border_width: u32,
+    gaps_inner: u32,
+    gaps_outer: u32,
     border_focused: String,
     border_unfocused: String,
     mod_key: String,
@@ -166,6 +170,23 @@ fn parse_action(action_string: String) -> Result<Action, NwwmError> {
 
             Action::SwitchWorkspace(workspace.unwrap())
         }
+        "setlayout" => {
+            if action_split.len() == 1 {
+                return Err(ParseActionError);
+            }
+
+            let layout: Option<Layout> = match action_split[1] {
+                "monocle" => Some(Layout::Monocle),
+                "masterstack" => Some(Layout::MasterStack),
+                _ => None,
+            };
+
+            if layout.is_none() {
+                return Err(ParseActionError);
+            }
+
+            Action::SetLayout(layout.unwrap())
+        }
 
         "focus" => {
             if action_split.len() == 1 {
@@ -260,6 +281,9 @@ impl Config {
         let border_unfocused =
             alloc_color_from_hex(logger, conn, screen, config_file.border_unfocused.as_str());
 
+        let gaps_inner = config_file.gaps_inner;
+        let gaps_outer = config_file.gaps_outer;
+
         let mod_key = match config_file.mod_key.as_str() {
             "Mod1" => xcb::x::ModMask::N1, // alt
             "Mod2" => xcb::x::ModMask::N2, // num lock
@@ -297,6 +321,8 @@ impl Config {
 
         Self {
             border_width,
+            gaps_inner,
+            gaps_outer,
             border_focused,
             border_unfocused,
             mod_key,

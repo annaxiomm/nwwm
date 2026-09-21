@@ -10,6 +10,10 @@ border_unfocused = "ffffff" # white
 # the mod key to be used
 mod_key = "Mod4"
 
+# gaps
+gaps_inner = "5"
+gaps_outer = "10"
+
 # commands that will be executed at startup
 startup = [
     "polybar",
