@@ -18,7 +18,19 @@ a {
     left: 50%;
     transform: translateX(-50%);
     width: 850px;
+    padding: 10px;
     margin-top: 50px;
+    box-sizing: border-box;
+}
+
+#too-small {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 10px;
+    padding: 10px;
+    border: 3px solid red;
 }
 
 #header {
@@ -73,4 +85,35 @@ ul li, ol li {
 .warning-title {
     font-size: 1.3em;
     font-weight: bold;
+}
+
+@media screen and (max-width: 850px) {
+    #container {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 612px) {
+    #header {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    #logo {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 250px) {
+    #container {
+        display: none;
+    }
+
+    #too-small {
+        display: block;
+    }
 }
