@@ -1,41 +1,44 @@
 # width of the border around windows, in px
-border_width = 2
+border_width = 3
 
 # colour of the border of focused windows, in hex
-border_focused = "ff0000" # red
+border_focused = "#a9a9a9" # colours can either be in the form #RRGGBB...
 
 # colour of the border of unfocused windows, in hex
-border_unfocused = "ffffff" # white
+border_unfocused = "808080" # ...or RRGGBB
 
-# the mod key to be used
-mod_key = "Mod4"
+# mod key to be used in keyboard shortcuts
+mod_key = "Mod4" # Meta key
 
-# gaps
-gaps_inner = "10"
-gaps_outer = "10"
-
-# the default layout that will be applied to each workspace
+# default layout that will be applied to all workspaces at startup
 default_layout = "masterstack"
 
-# commands that will be executed at startup
+# gaps
+gaps_inner = 10
+gaps_outer = 10
+
+# apps that will be run at startup
 startup = [
-    "polybar",
-    "kitty"
+  "polybar",
+  "kitty",
 ]
 
-# keybinds
-# format: "modifiers+key" = "action parameters"
-keybinds = [
-    "mod+shift+q" = "quit",
-    "mod+w" = "focus next",
-    "mod+c" = "closewindow",
+keybinds = {
+  "mod+shift+q" = "quit",
+  "mod+w" = "focus next",
+  "mod+c" = "closewindow",
 
-    "mod+enter" = "exec kitty",
-    "mod+r" = "exec rofi -show run",
+  "mod+return" = "exec kitty",
+  "mod+r" = "exec rofi -show run",
 
-    "mod+1" = "setworkspace 1",
-    "mod+2" = "setworkspace 2",
-    "mod+3" = "setworkspace 3",
-    "mod+4" = "setworkspace 4",
-    "mod+5" = "setworkspace 5",
-]
+  "mod+1" = "setworkspace 1",
+  "mod+2" = "setworkspace 2",
+  "mod+3" = "setworkspace 3",
+  "mod+4" = "setworkspace 4",
+  "mod+5" = "setworkspace 5",
+
+  "mod+m" = "setlayout monocle",
+  "mod+s" = "setlayout masterstack",
+  "mod+shift+c" = "setlayout columns",
+  "mod+shift+s" = "exec flameshot gui"
+}
