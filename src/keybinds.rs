@@ -6,7 +6,7 @@
 use xkbcommon::xkb;
 
 use crate::{err::NwwmError, logger::LogLevel, tile::Layout, wm::WindowManager};
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 #[derive(Clone)]
 pub enum Action {
@@ -125,14 +125,16 @@ impl WindowManager {
             return Ok(());
         }
 
-        self.unmap_workspace(self.current_workspace); // ^
-        self.current_workspace = workspace_id - 1; // | switch these calls around to get rid of screen flicker
-        self.map_workspace(self.current_workspace); // V
+        self.map_workspace(workspace_id - 1);
+        self.unmap_workspace(self.current_workspace);
+        self.current_workspace = workspace_id - 1;
 
         // focus the first window in the workspace
         // TODO: make workspaces remember which windows are focused
         if !self.workspaces[self.current_workspace].windows.is_empty() {
-            self.focus_window(self.workspaces[self.current_workspace].windows[0].id)?;
+            if let Some(w) = self.workspaces[self.current_workspace].focused {
+                self.focus_window(w)?;
+            }
         } else {
             self.unfocus();
         }

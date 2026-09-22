@@ -5,7 +5,7 @@
 
 use serde::Deserialize;
 use std::{collections::HashMap, fs, io::Write};
-use xcb::x::{Keysym, ModMask};
+use xcb::x::ModMask;
 
 use crate::{
     err::NwwmError::{self, ParseActionError},
@@ -26,6 +26,7 @@ pub struct Config {
     pub startup: Vec<String>,
     pub gaps_inner: u32,
     pub gaps_outer: u32,
+    pub default_layout: Layout,
 }
 
 // config parsed directly from TOML which can then
@@ -40,6 +41,7 @@ pub struct FileConfig {
     mod_key: String,
     keybinds: HashMap<String, String>,
     startup: Vec<String>,
+    default_layout: String,
 }
 
 // helper function to allocate colours for X11 - X11 doesn't
@@ -205,6 +207,15 @@ fn parse_action(action_string: String) -> Result<Action, NwwmError> {
     Ok(action)
 }
 
+fn parse_layout(l: String) -> Result<Layout, NwwmError> {
+    match l.to_lowercase().as_str() {
+        "monocle" => Ok(Layout::Monocle),
+        "masterstack" => Ok(Layout::MasterStack),
+        "columns" => Ok(Layout::Columns),
+        _ => Err(NwwmError::ParseLayoutError),
+    }
+}
+
 // helper function that converts a string to
 // a hex colour and then allocates that as an
 // X11 colour
@@ -297,6 +308,21 @@ impl Config {
             }
         };
 
+        let default_layout = match parse_layout(config_file.default_layout.clone()) {
+            Ok(layout) => layout,
+            Err(_) => {
+                logger.log(
+                    format!(
+                        "invalid default layout \"{}\", using MasterStack",
+                        config_file.default_layout
+                    )
+                    .as_str(),
+                    LogLevel::Error,
+                );
+                Layout::MasterStack
+            }
+        };
+
         let parsed_keybinds = parse_keybinds(mod_key, config_file.keybinds);
         let keybinds = match parsed_keybinds {
             Ok(keybinds) => keybinds,
@@ -327,6 +353,7 @@ impl Config {
             border_focused,
             border_unfocused,
             mod_key,
+            default_layout,
             keybinds,
             startup,
         }

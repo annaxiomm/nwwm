@@ -56,6 +56,9 @@ nwwm can be configured using the following options:
 | `border_unfocused` | the colour of a window's border when unfocused | `#ffffff` |
 | `border_width` | the width of a window's border in pixels | `2` |
 | `mod_key` | the modifier key to be used in keybindings | `Mod4` (Windows / Command key) |
+| `gaps_outer` | the width of the outer gaps (between the windows and the edge of the screen) in pixels | `10` |
+| `gaps_inner` | the width of the inner gaps (between each window) in pixels | `10` |
+| `default_layout` | the default tiling layout to be used in each workspace | `masterstack` |
 
 `mod_key` can be set to the following values:
 - `Mod1` - alt
@@ -63,6 +66,11 @@ nwwm can be configured using the following options:
 - `Mod3` - nothing (don't use this one)
 - `Mod4` - meta key (windows / command depending on the keyboard)
 - `Mod5` - alt gr
+
+`default_layout` can be set to the following values:
+- `masterstack` - one window takes up half the screen (the *master*) and the others are tiled vertically in the other half (the *stack*)
+- `columns` - each window takes up an equal amount of space, divided horizontally
+- `monocle` - each window takes up the whole screen, and the currently focused window is brought to the front
 
 ### Keybindings
 Keybindings in nwwm are configured using the following syntax:
@@ -92,7 +100,7 @@ for example:
 | `setworkspace <workspace>` | sets the current workspace to `<workspace>` | `<workspace>` can be any positive integer (whole number) greater than 0 |
 | `focus <direction>` | moves window focus | `<direction>` can either be `next` or `last` |
 | `quit` | quits nwwm | |
-
+| `setlayout <layout>` | sets the layout of the current workspace | `<layout>` can be `monocle`, `masterstack`, or `columns` |
 a full example config can be found at [config/default.toml](config/default.toml)
 
 ## What I learned

@@ -221,6 +221,10 @@ impl WindowManager {
             self.focused = None;
         }
 
+        if Some(window) == self.workspaces[self.current_workspace].focused {
+            self.workspaces[self.current_workspace].focused = None;
+        }
+
         for workspace in &mut self.workspaces {
             workspace.windows.retain(|w| w.id != window);
         }

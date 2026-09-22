@@ -1,3 +1,8 @@
+// |-----------|
+// | WM.RS     |
+// |-----------|
+// Contains most
+
 use std::collections::HashMap;
 
 use xcb::{self, x};
@@ -59,13 +64,14 @@ pub struct Dock {
 pub struct Workspace {
     pub windows: Vec<Window>,
     pub layout: Layout,
+    pub focused: Option<xcb::x::Window>,
 }
 
 pub struct WindowManager {
-    pub conn: xcb::Connection, // conn is public so handlers can access it from handlers.rs
-    pub workspaces: Vec<Workspace>, // same here
+    pub conn: xcb::Connection,
+    pub workspaces: Vec<Workspace>,
     pub num_workspaces: usize,
-    pub clients: Vec<Window>,
+    pub clients: Vec<Window>, // list of all managed windows regardless of workspace
     pub docks: Vec<Dock>,
     pub ewmh: Ewmh,
     pub config: Config,
@@ -93,6 +99,7 @@ impl WindowManager {
 
         let root_window = screen.root();
 
+        // select mousedown events for focusing
         conn.send_request(&xcb::x::GrabButton {
             owner_events: false,
             grab_window: root_window,
@@ -118,7 +125,8 @@ impl WindowManager {
         let workspaces: Vec<Workspace> = vec![
             Workspace {
                 windows: Vec::new(),
-                layout: Layout::MasterStack,
+                layout: config.default_layout,
+                focused: None
             };
             5
         ];
@@ -174,6 +182,8 @@ impl WindowManager {
         self.check_other_wm(self.ewmh.root)?;
 
         self.grab_keys();
+
+        // focus root window so keypress events will be detected
         self.conn.send_request(&xcb::x::SetInputFocus {
             revert_to: xcb::x::InputFocus::PointerRoot,
             focus: self.ewmh.root,
@@ -223,6 +233,7 @@ impl WindowManager {
         }
     }
 
+    // tiles the current workspace according to its selected layout
     pub fn tile(&mut self) -> Result<(), NwwmError> {
         let windows: Vec<xcb::x::Window> = self.workspaces[self.current_workspace]
             .windows
@@ -259,6 +270,7 @@ impl WindowManager {
             time: xcb::x::CURRENT_TIME,
         });
 
+        // bring window to the top - for floating and monocle mode
         let cookie = self.conn.send_request_checked(&xcb::x::ConfigureWindow {
             window,
             value_list: &[xcb::x::ConfigWindow::StackMode(xcb::x::StackMode::Above)],
@@ -281,6 +293,7 @@ impl WindowManager {
         }
 
         self.focused = Some(window);
+        self.workspaces[self.current_workspace].focused = Some(window);
 
         self.ewmh.set_active_window(&self.conn, window);
 
@@ -289,6 +302,7 @@ impl WindowManager {
         Ok(())
     }
 
+    // sets the current
     pub fn unfocus(&mut self) {
         if let Some(old) = self.focused {
             self.conn.send_request(&xcb::x::ChangeWindowAttributes {
@@ -340,6 +354,7 @@ impl WindowManager {
         Ok(())
     }
 
+    // recalculates available screen area based on currently active dock windows
     pub fn recalculate_screen_area(&mut self) {
         let screen = self
             .conn
@@ -349,6 +364,7 @@ impl WindowManager {
             .ok_or(NwwmError::ScreenGrabError)
             .unwrap();
 
+        // get reserved area from all active docks
         let left = self.docks.iter().map(|d| d.strut.left).max().unwrap_or(0);
         let right = self.docks.iter().map(|d| d.strut.right).max().unwrap_or(0);
         let top = self.docks.iter().map(|d| d.strut.top).max().unwrap_or(0);
@@ -362,6 +378,8 @@ impl WindowManager {
         };
     }
 
+    // selects events that nwwm wants to listen to,
+    // if this request fails then 9/10 times another wm is running
     fn check_other_wm(&self, root: xcb::x::Window) -> Result<(), NwwmError> {
         let cookie = self.conn.send_request_checked(&x::ChangeWindowAttributes {
             window: root,
@@ -408,11 +426,15 @@ impl WindowManager {
         Ok(())
     }
 
+    // probably should make this a bit more fleshed out
     pub fn quit(&mut self) {
         self.logger.log("goodbye !", LogLevel::Info);
         self.should_quit = true;
     }
 
+    // i don't know why this function exists but
+    // it can stay i guess - finds an nwwm Window from
+    // its x11 id
     fn _get_window(&self, id: x::Window) -> Option<&Window> {
         self.workspaces
             .iter()

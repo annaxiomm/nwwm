@@ -11,8 +11,11 @@ border_unfocused = "ffffff" # white
 mod_key = "Mod4"
 
 # gaps
-gaps_inner = "5"
+gaps_inner = "10"
 gaps_outer = "10"
+
+# the default layout that will be applied to each workspace
+default_layout = "masterstack"
 
 # commands that will be executed at startup
 startup = [
