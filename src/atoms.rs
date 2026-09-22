@@ -31,6 +31,8 @@ pub struct Atoms {
     pub net_wm_window_type_dock: x::Atom,
     pub net_wm_window_type_utility: x::Atom,
 
+    pub net_wm_desktop: x::Atom,
+
     pub net_wm_strut_partial: x::Atom,
 
     pub utf8_string: x::Atom,
@@ -56,6 +58,8 @@ impl Atoms {
             net_wm_window_type_dialog: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DIALOG")?,
             net_wm_window_type_dock: intern_atom(conn, "_NET_WM_WINDOW_TYPE_DOCK")?,
             net_wm_window_type_utility: intern_atom(conn, "_NET_WM_WINDOW_TYPE_UTILITY")?,
+
+            net_wm_desktop: intern_atom(conn, "_NET_WM_DESKTOP")?,
 
             // struts
             net_wm_strut_partial: intern_atom(conn, "_NET_WM_STRUT_PARTIAL")?,

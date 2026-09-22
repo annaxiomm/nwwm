@@ -256,6 +256,14 @@ impl WindowManager {
             value_list: &[xcb::x::ConfigWindow::BorderWidth(self.config.border_width)],
         });
 
+        self.conn.send_request(&xcb::x::ChangeProperty {
+            mode: xcb::x::PropMode::Replace,
+            window,
+            property: self.ewmh.atoms.net_wm_desktop,
+            r#type: xcb::x::ATOM_CARDINAL,
+            data: &[self.current_workspace as u32],
+        });
+
         self.conn.send_request(&xcb::x::ChangeWindowAttributes {
             window,
             value_list: &[xcb::x::Cw::BorderPixel(self.config.border_unfocused)],
