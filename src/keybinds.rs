@@ -15,6 +15,7 @@ pub enum Action {
     SetLayout(Layout),
     Exec(String),
     SwitchWorkspace(usize),
+    MoveToWorkspace(usize),
 
     Quit,
 }
@@ -81,6 +82,11 @@ impl WindowManager {
             Action::FocusNext => self.focus_next()?,
             Action::SetLayout(layout) => self.set_layout(layout)?,
             Action::SwitchWorkspace(id) => self.switch_workspace(id)?,
+            Action::MoveToWorkspace(id) => {
+                if let Some(w) = self.focused {
+                    self.move_to_workspace(w, id)?;
+                }
+            }
             Action::CloseWindow => {
                 if let Some(win) = self.focused {
                     self.close_window(win)?;
@@ -129,8 +135,6 @@ impl WindowManager {
         self.unmap_workspace(self.current_workspace);
         self.current_workspace = workspace_id - 1;
 
-        // focus the first window in the workspace
-        // TODO: make workspaces remember which windows are focused
         if !self.workspaces[self.current_workspace].windows.is_empty() {
             if let Some(w) = self.workspaces[self.current_workspace].focused {
                 self.focus_window(w)?;
@@ -141,6 +145,80 @@ impl WindowManager {
 
         self.ewmh
             .update_current_desktop(&self.conn, self.current_workspace as u32);
+
+        self.tile()?;
+
+        Ok(())
+    }
+
+    pub fn move_to_workspace(
+        &mut self,
+        window: xcb::x::Window,
+        workspace_id: usize,
+    ) -> Result<(), NwwmError> {
+        println!("received workspace call");
+        println!("moving {:?} to {}", window, workspace_id);
+        if workspace_id > self.num_workspaces || workspace_id == 0 {
+            self.logger.log(
+                format!("workspace index \"{}\" out of bounds", workspace_id).as_str(),
+                LogLevel::Error,
+            );
+            return Ok(());
+        }
+
+        // if you try to switch to the current workspace, reject
+        if workspace_id == self.current_workspace + 1 {
+            println!("attempting to move to current desktop");
+            return Ok(());
+        }
+
+        println!("moving window {:?} to workspace {}", window, workspace_id);
+
+        let window_struct = match self.workspaces[self.current_workspace]
+            .windows
+            .iter()
+            .find(|w| w.id == window)
+            .cloned()
+        {
+            Some(w) => w,
+            None => return Ok(()),
+        };
+
+        let new_focus = if self.focused == Some(window) {
+            self.workspaces[self.current_workspace]
+                .windows
+                .iter()
+                .position(|w| w.id == window)
+                .and_then(|position| {
+                    position
+                        .checked_sub(1)
+                        .and_then(|prev| self.workspaces[self.current_workspace].windows.get(prev))
+                        .or_else(|| {
+                            self.workspaces[self.current_workspace]
+                                .windows
+                                .get(position + 1)
+                        })
+                })
+                .map(|w| w.id)
+        } else {
+            None
+        };
+
+        self.workspaces[self.current_workspace]
+            .windows
+            .retain(|w| w.id != window);
+
+        self.workspaces[workspace_id - 1]
+            .windows
+            .push(window_struct);
+
+        println!("{:?}", new_focus);
+
+        if let Some(w) = new_focus {
+            self.focus_window(w)?;
+        }
+
+        self.unmap_window(window);
 
         self.tile()?;
 

@@ -172,6 +172,19 @@ fn parse_action(action_string: String) -> Result<Action, NwwmError> {
 
             Action::SwitchWorkspace(workspace.unwrap())
         }
+        "movetoworkspace" => {
+            if action_split.len() == 1 {
+                return Err(ParseActionError);
+            }
+
+            let workspace = action_split[1].parse::<usize>();
+            if workspace.is_err() {
+                return Err(ParseActionError);
+            }
+
+            Action::MoveToWorkspace(workspace.unwrap())
+        }
+
         "setlayout" => {
             if action_split.len() == 1 {
                 return Err(ParseActionError);
