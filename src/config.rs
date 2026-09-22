@@ -178,6 +178,7 @@ fn parse_action(action_string: String) -> Result<Action, NwwmError> {
             let layout: Option<Layout> = match action_split[1] {
                 "monocle" => Some(Layout::Monocle),
                 "masterstack" => Some(Layout::MasterStack),
+                "columns" => Some(Layout::Columns),
                 _ => None,
             };
 
