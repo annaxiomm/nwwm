@@ -98,6 +98,7 @@ for example:
 | `exec <command>` | runs `<command>` | `<command>` can be any string that represents a valid shell command on your system (e.g. `kitty`, `rofi -show run`) |
 | `closewindow` | closes the currently focused window | |
 | `setworkspace <workspace>` | sets the current workspace to `<workspace>` | `<workspace>` can be any positive integer (whole number) greater than 0 |
+| `movetoworkspace <workspace>` | moves the currently focused window to `<workspace` | `<workspace>` can be any positive integer greater than 0 |
 | `focus <direction>` | moves window focus | `<direction>` can either be `next` or `last` |
 | `quit` | quits nwwm | |
 | `setlayout <layout>` | sets the layout of the current workspace | `<layout>` can be `monocle`, `masterstack`, or `columns` |
