@@ -81,40 +81,55 @@
             <h1 id="config">Configuring</h1>
             <p>nwwm is configured via a TOML config file, which is by default located at <code>~/.config/nwwm/config.toml</code> or wherever your config directory is). If no configuration file is present, nwwm will attempt to create one using its defaults.</p>
             <p>The default config file is provided below. For more in-depth configuration docs, see <a href="docs/">Documentation</a></p>
-            <!-- HTML generated using hilite.me --><div style="background: #28283e; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #6272A4"># width of the border around windows, in px</span>
-<span style="color: #F8F8F2">border_width </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #FFB86C">2</span>
+<!-- HTML generated using hilite.me --><div style="background: #282a36; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #F8F8F2">e border around windows, in px</span>
+<span style="color: #F8F8F2">border_width </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #FFB86C">3</span>
 
 <span style="color: #6272A4"># colour of the border of focused windows, in hex</span>
-<span style="color: #F8F8F2">border_focused </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;ff0000&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># red</span>
+<span style="color: #F8F8F2">border_focused </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;#a9a9a9&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># colours can either be in the form #RRGGBB...</span>
 
 <span style="color: #6272A4"># colour of the border of unfocused windows, in hex</span>
-<span style="color: #F8F8F2">border_unfocused </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;ffffff&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># white</span>
+<span style="color: #F8F8F2">border_unfocused </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;808080&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># ...or RRGGBB</span>
 
-<span style="color: #6272A4"># the mod key to be used</span>
-<span style="color: #F8F8F2">mod_key </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;Mod4&quot;</span>
+<span style="color: #6272A4"># mod key to be used in keyboard shortcuts</span>
+<span style="color: #F8F8F2">mod_key </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;Mod4&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #6272A4"># Meta key</span>
 
-<span style="color: #6272A4"># commands that will be executed at startup</span>
+<span style="color: #6272A4"># default layout that will be applied to all workspaces at startup</span>
+<span style="color: #F8F8F2">default_layout </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;masterstack&quot;</span>
+
+<span style="color: #F8F8F2">gaps_inner </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #FFB86C">10</span>
+<span style="color: #F8F8F2">gaps_outer </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #FFB86C">10</span>
+
 <span style="color: #F8F8F2">startup </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> [</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;polybar&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;kitty&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;polybar&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;feh --bg-fill ~/Pictures/Wallpapers/blahaj.png&quot;</span><span style="color: #F8F8F2">,</span>
 <span style="color: #F8F8F2">]</span>
 
-<span style="color: #6272A4"># keybinds</span>
-<span style="color: #6272A4"># format: &quot;modifiers+key&quot; = &quot;action parameters&quot;</span>
-<span style="color: #F8F8F2">keybinds </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> [</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+shift+q&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;quit&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+w&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;focus next&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+c&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;closewindow&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">keybinds </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+q&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;quit&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+e&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;focus next&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+q&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;focus last&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+c&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;closewindow&quot;</span><span style="color: #F8F8F2">,</span>
 
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+enter&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;exec kitty&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+r&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;exec rofi -show run&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+return&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;exec kitty&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+r&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;exec rofi -show run&quot;</span><span style="color: #F8F8F2">,</span>
 
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+1&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 1&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+2&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 2&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+3&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 3&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+4&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 4&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">    </span><span style="color: #BD93F9">&quot;mod+5&quot;</span><span style="color: #F8F8F2"> = </span><span style="color: #BD93F9">&quot;setworkspace 5&quot;</span><span style="color: #F8F8F2">,</span>
-<span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+1&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setworkspace 1&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+2&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setworkspace 2&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+3&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setworkspace 3&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+4&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setworkspace 4&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+5&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setworkspace 5&quot;</span><span style="color: #F8F8F2">,</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+1&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;movetoworkspace 1&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+2&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;movetoworkspace 2&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+3&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;movetoworkspace 3&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+4&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;movetoworkspace 4&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+5&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;movetoworkspace 5&quot;</span><span style="color: #F8F8F2">,</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+m&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setlayout monocle&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+s&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setlayout masterstack&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+c&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;setlayout columns&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #BD93F9">&quot;mod+shift+s&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">&quot;exec flameshot gui&quot;</span>
+<span style="color: #F8F8F2">}</span>
 </pre></div>
 
 
