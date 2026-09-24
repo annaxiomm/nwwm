@@ -117,3 +117,24 @@ ul li, ol li {
         display: block;
     }
 }
+
+table, th, td {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 10px;
+}
+
+code {
+  background-color: #f0f0f015;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+}
+
+pre.example {
+  background-color: #f0f0f015;
+  padding: 20px;
+  width: fit-content;
+  border: 1px solid transparent;
+  border-radius: 5px;
+}

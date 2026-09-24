@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../main.css" rel="stylesheet" />
+	<link href="images/logo.png" rel="icon" type="image/png" />
+	<title>nwwm</title>
+</head>
+<body>
+    <div id="too-small">
+        <strong>Your screen is too small to view this webpage properly. Please rotate your device's screen, or try another device</strong>
+    </div>
+    <div id="container">
+      <div id="header">
+        <div id="logo">
+          <img src="../images/logo.png" id="logo-image" />
+          <div>
+            <h1 id="logo-title">nwwm</h1>
+            <span>an experimental window manager</span>
+          </div>
+        </div>
+        <div id="links">
+          <a href="/">Home</a>
+          <a href="#">Documentation</a>
+          <a href="https://github.com/annaxiomm/nwwm">GitHub</a>
+        </div>
+      </div>
+      <div id="content">
+        <h1>Docs</h1>
+        <p>nwwm is configured via a TOML config file, which is by default located at ~/.config/nwwm/config.toml or wherever your config directory is). If no configuration file is present, nwwm will attempt to create one using its defaults.
+        <h2>Options</h2>
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+            <th>Default</th>
+          </tr>
+          <tr>
+            <td><code>border_focused</code></td>
+            <td>the colour of a window's border when focused</td>
+            <td><code>#a9a9a9</code></td>
+          </tr>
+          <tr>
+            <td><code>border_unfocused</code></td>
+            <td>the colour of a window's border when unfocused</td>
+            <td><code>#808080</code></td>
+          </tr>
+          <tr>
+            <td><code>border_width</code></td>
+            <td>the width of a window's border in pixels</td>
+            <td><code>3</code></td>
+          </tr>
+          <tr>
+            <td><code>mod_key</code></td>
+            <td>the modifier key to be used in keybindings</td>
+            <td><code>Mod4</code></td>
+          </tr>
+          <tr>
+            <td><code>gaps_outer</code></td>
+            <td>the width of the outer gaps (between the windows and the edge of the screen) in pixels</td>
+            <td><code>10</code></td>
+          </tr>
+          <tr>
+            <td><code>gaps_inner</code></td>
+            <td>the width of the inner gaps (between each window) in pixels</td>
+            <td><code>10</code></td>
+          </tr>
+          <tr>
+            <td><code>default_layout</code></td>
+            <td>the default tiling layout to be used in each workspace</td>
+            <td><code>masterstack</code></td>
+          </tr>
+        </table>
+        <p>
+          <code>mod_key</code> can be set to the following values:
+          <ul>
+            <li><code>Mod1</code> - alt</li>
+            <li><code>Mod2</code> - number lock</li>
+            <li><code>Mod3</code> - nothing (don't use this one)</li>
+            <li><code>Mod4</code> - meta (windows / command depending on the keyboard)</li>
+            <li><code>Mod5</code> - alt gr</li>
+          </ul>
+        </p>
+        <p>
+          <code>default_layout</code> can be set to the following values:
+          <ul>
+            <li><code>masterstack</code> -  one window takes up half the screen (the <i>master</i>) and the others are tiled vertically in the other half (the <i>stack</i>)</li>
+            <li><code>columns</code> - each window takes up an equal amount of space, divided horizontally</li>
+            <li><code>monocle</code> - each window takes up the whole screen, and the currently focused window is brought to the front</li>
+          </ul>
+        </p>
+        <h2>Keybindings</h2>
+        <p>Keybindings in nwwm are configured using the following syntax:</p>
+        <pre class="example">keybinds = {
+  "modifiers+key" = "action"
+}</pre>
+        <p>for example:</p>
+        <pre class="example">"mod+return" = "exec kitty",
+"mod+shift+q" = "quit"
+</pre>
+        <h4>Modifiers</h4>
+        <ul>
+          <li><code>mod</code> - whatever is set as <code>mod_key</code></li>
+          <li><code>shift</code></li>
+          <li><code>alt</code></li>
+          <li><code>ctrl</code> - ctrl</li>
+        </ul>
+        <h4>Actions</h4>
+        <table>
+          <tr>
+            <th>Action</th>
+            <th>Description</th>
+            <th>Values</th>
+          </tr>
+          <tr>
+            <td><code>exec &lt;command&gt;</code></td>
+            <td>runs <code>&lt;command&gt;</code></td>
+            <td><code>&lt;command&gt;</code> can be any string that represents a valid shell command on your system (e.g. <code>kitty</code>, <code>rofi -show run</code>)</td>
+          </tr>
+          <tr>
+            <td><code>closewindow</code></td>
+            <td>closes the currently focused window</td>
+          </tr>
+          <tr>
+            <td><code>setworkspace &lt;workspace&gt;</code></td>
+            <td>sets the current workspace to <code>&lt;workspace&gt;</code></td>
+            <td><code>&lt;workspace&gt;</code> can be any positive integer (whole number) greater than one</td>
+          </tr>
+          <tr>
+            <td><code>movetoworkspace &lt;workspace&gt;</code></td>
+            <td>moves the currently focused window to <code>&lt;workspace&gt;</code></td>
+            <td><code>&lt;workspace&gt;</code> can be any positive integet (whole number) greater than one</td>
+          </tr>
+          <tr>
+            <td><code>focus &lt;direction&gt;</code></td>
+            <td>moves window focus</td>
+            <td><code>&lt;direction&gt;</code> can either be <code>next</code> or <code>last</code></td>
+          </tr>
+          <tr>
+            <td><code>quit</code></td>
+            <td>quits nwwm</td>
+          </tr>
+          <tr>
+            <td><code>setlayout &lt;layout&gt;</code></td>
+            <td>sets the layout of the current workspace</td>
+            <td><code>&lt;layout&gt;</code> can be <code>masterstack</code>, <code>monocle</code>, or <code>columns</code></td>
+          </tr> 
+        </table>
+        <p>
+          a full example config can be found <a href="https://github.com/annaxiomm/nwwm/blob/master/config/default.toml">in the GitHub repo</a>
+        </p>
+      </div>
+      <div id="footer">
+        <p>made with ❤️ by <a href="https://github.com/annaxiomm">annaxiomm</a> in 2026 | <a href="https://github.com/annaxiomm/nwwm">GitHub</a></p>
+      </div>
+    </div>
+</body>
+</html>
