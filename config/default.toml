@@ -13,19 +13,18 @@ mod_key = "Mod4" # Meta key
 # default layout that will be applied to all workspaces at startup
 default_layout = "masterstack"
 
-# gaps
 gaps_inner = 10
 gaps_outer = 10
 
-# apps that will be run at startup
 startup = [
   "polybar",
-  "kitty",
+  "feh --bg-fill ~/Pictures/Wallpapers/blahaj.png",
 ]
 
 keybinds = {
   "mod+shift+q" = "quit",
-  "mod+w" = "focus next",
+  "mod+e" = "focus next",
+  "mod+q" = "focus last",
   "mod+c" = "closewindow",
 
   "mod+return" = "exec kitty",
@@ -36,6 +35,12 @@ keybinds = {
   "mod+3" = "setworkspace 3",
   "mod+4" = "setworkspace 4",
   "mod+5" = "setworkspace 5",
+
+  "mod+shift+1" = "movetoworkspace 1",
+  "mod+shift+2" = "movetoworkspace 2",
+  "mod+shift+3" = "movetoworkspace 3",
+  "mod+shift+4" = "movetoworkspace 4",
+  "mod+shift+5" = "movetoworkspace 5",
 
   "mod+m" = "setlayout monocle",
   "mod+s" = "setlayout masterstack",

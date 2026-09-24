@@ -11,6 +11,7 @@ use std::process::Command;
 #[derive(Clone)]
 pub enum Action {
     FocusNext,
+    FocusLast,
     CloseWindow,
     SetLayout(Layout),
     Exec(String),
@@ -80,6 +81,7 @@ impl WindowManager {
     pub fn run_action(&mut self, action: Action) -> Result<(), NwwmError> {
         match action {
             Action::FocusNext => self.focus_next()?,
+            Action::FocusLast => self.focus_last()?,
             Action::SetLayout(layout) => self.set_layout(layout)?,
             Action::SwitchWorkspace(id) => self.switch_workspace(id)?,
             Action::MoveToWorkspace(id) => {

@@ -340,6 +340,34 @@ impl WindowManager {
         Ok(())
     }
 
+    pub fn focus_last(&mut self) -> Result<(), NwwmError> {
+        let last = {
+            let workspace = &self.workspaces[self.current_workspace];
+            if workspace.windows.is_empty() {
+                return Ok(());
+            }
+
+            match self.focused {
+                Some(current) => {
+                    let current_index = workspace
+                        .windows
+                        .iter()
+                        .position(|w| w.id == current)
+                        .unwrap_or(0);
+                    workspace.windows
+                        [(current_index + workspace.windows.len() - 1) % workspace.windows.len()]
+                    .id
+                }
+
+                None => workspace.windows[0].id,
+            }
+        };
+
+        self.focus_window(last)?;
+
+        Ok(())
+    }
+
     pub fn close_window(&self, window: xcb::x::Window) -> Result<(), NwwmError> {
         self.conn.send_request(&xcb::x::DestroyWindow { window });
         self.conn.flush().unwrap();

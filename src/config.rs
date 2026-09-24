@@ -211,6 +211,7 @@ fn parse_action(action_string: String) -> Result<Action, NwwmError> {
 
             match action_split[1] {
                 "next" => Action::FocusNext,
+                "last" => Action::FocusLast,
                 _ => return Err(ParseActionError),
             }
         }
