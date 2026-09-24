@@ -138,3 +138,8 @@ pre.example {
   border: 1px solid transparent;
   border-radius: 5px;
 }
+
+#demo {
+  width: 100%;
+  box-sizing: border-box;
+}
